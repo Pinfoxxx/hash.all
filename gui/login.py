@@ -3,6 +3,8 @@ from tkinter import ttk, messagebox
 import threading
 import socket
 
+from ..config import LOGIN_RES as RESOLUTION
+
 
 class LoginWindow:
 
@@ -21,7 +23,7 @@ class LoginWindow:
     def setup_gui(self):
         # Main attributes
         ...  # title placeholder
-        self.app.geometry("400x300")
+        self.app.geometry(RESOLUTION)
         self.app.resizable(False, False)
 
         # Frames
@@ -70,6 +72,24 @@ class LoginWindow:
         self.set_gui_state(disabled=True)
         self.status_label.config(text="Authenticating...")
 
+        # Run auth thread method
+        def login_thread(): ...  # placeholder
+
+    def register(self):
+        username = self.username_entry.get().strip()
+        password = self.password_entry.get()
+
+        if not username or not password:
+            self.status_label.config(text="Please enter both username and password")
+            return
+
+        self.set_gui_state(disabled=True)
+        self.status_label.config(text="Registering...")
+
+        def register_thread(): ...  # placeholder
+
+    def auth_callback(self, response): ...  # placeholder
+
     # Foolproof n.2 (to make it impossible to spam requests)
     def set_gui_state(self, disabled: bool):
         state = "disabled" if disabled else "normal"
@@ -77,3 +97,5 @@ class LoginWindow:
         self.register_btn.config(state=state)
         self.username_entry.config(state=state)
         self.password_entry.config(state=state)
+
+    def open_main_app(self): ...  # placeholder
