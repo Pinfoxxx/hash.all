@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from typing import ClassVar
 
+# Many of these constants are placeholders, but will be used soon
 
 # Security configuration
 class SecurityConfig:
