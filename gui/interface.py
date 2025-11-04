@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox, scrolledtext
 import threading
 from typing import Optional
 
-from ..config import INTERFACE_RES as RESOLUTION
+from ..config import AppConfig
 
 
 class MainApplication:
@@ -16,7 +16,7 @@ class MainApplication:
 
     def setup_ui(self):
         self.app.title(f"hash.all - {self.username}'s Vault")
-        self.app.geometry(RESOLUTION)
+        self.app.geometry(AppConfig.DEFAULT_WINDOW_SIZE)
         # self.app.protocol("WM_DELETE_WINDOW", self.secure_exit) # Placeholder
 
         # Main frame

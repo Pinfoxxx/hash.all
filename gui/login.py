@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox
 import threading
 import socket
 
-from ..config import LOGIN_RES as RESOLUTION
+from ..config import AppConfig
 
 
 class LoginWindow:
@@ -23,7 +23,7 @@ class LoginWindow:
     def setup_gui(self):
         # Main attributes
         ...  # title placeholder
-        self.app.geometry(RESOLUTION)
+        self.app.geometry(AppConfig.DEFAULT_WINDOW_SIZE)
         self.app.resizable(False, False)
 
         # Frames
