@@ -1,2 +1,3 @@
+# Constants
 LOGIN_RES = "400x300"
 INTERFACE_RES = "800x600"
