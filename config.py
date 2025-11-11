@@ -4,6 +4,7 @@ from typing import ClassVar
 
 # Many of these constants are placeholders, but will be used soon
 
+
 # Security configuration
 class SecurityConfig:
     PBKDF2_ITERATIONS: ClassVar[int] = 100000  # Count of iterations for PBKDF2
