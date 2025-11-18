@@ -97,8 +97,4 @@ class AuthRespModel(BaseSecureModel):
     def validate_seq(self) -> "AuthRespModel":
         if self.success and self.lockout_time:
             raise ValueError("Successful auth responce cannot have lockout time")
-        if self.success and self.remaining_attempts is not None:
-            raise ValueError(
-                "Successful auth responce should not have remaining attempts"
-            )
         return self
