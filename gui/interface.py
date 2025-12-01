@@ -5,6 +5,7 @@ from typing import Optional
 
 from crypto.crypto import CryptoManager
 from keys.vault import VaultManager
+from models.vault_model import VaultEntryModel
 from pass_gen.pass_gen import PasswordGen
 from web_requests.hibp_api import HIBPClient
 
@@ -44,7 +45,7 @@ class MainApplication:
 
         # Password generator tab
         self.gen_frame = ttk.Frame(self.notebook)
-        # self.setup_get_tab()
+        # self.setup_gen_tab()
         self.notebook.add(self.vault_frame, text="Password Generator")
 
         # HIBP check tab
@@ -125,27 +126,188 @@ class MainApplication:
             side=tk.LEFT, padx=5
         )
 
-    def setup_get_tab(self): ...  # Placeholder
-    def setup_hibp_tab(self): ...  # Placeholder
+    def setup_gen_tab(self):
+        main_frame = ttk.Frame(self.gen_frame)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        ttk.Label(main_frame, text="Password Lenght").grid(
+            row=0, column=0, sticky=tk.W, pady=5
+        )
+        self.lenght_var = tk.IntVar(value=16)
+        lenght_spin = ttk.Spinbox(
+            main_frame, from_=8, to=50, textvariable=self.lenght_var, width=10
+        )
+        lenght_spin.grid(row=0, column=1, sticky=tk.W, pady=5)
+
+        self.upper_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(
+            main_frame, text="Uppercase Letters (A-Z)", variable=self.upper_var
+        ).grid(row=1, column=0, sticky=tk.W, pady=2)
+
+        self.lower_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(
+            main_frame, text="Lowercase Letters (A-Z)", variable=self.lower_var
+        ).grid(row=2, column=0, sticky=tk.W, pady=2)
+
+        self.digits_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(main_frame, text="Digits (0-9)", variable=self.digits_var).grid(
+            row=3, column=0, sticky=tk.W, pady=2
+        )
+
+        self.special_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(
+            main_frame, text="Special Characters (!@#$%)", variable=self.special_var
+        ).grid(row=4, column=0, sticky=tk.W, pady=2)
+
+        ttk.Label(main_frame, text="Generated Password:").grid(
+            row=5, column=0, sticky=tk.W, pady=10
+        )
+
+        self.generated_pass_var = tk.StringVar()
+        pass_entry = ttk.Entry(
+            main_frame,
+            textvariable=self.generated_pass_var,
+            width=40,
+            font=("Courier", 10),
+        )
+        pass_entry.grid(row=6, column=0, columnspan=2, sticky=tk.W, pady=5)
+
+        ttk.Button(
+            main_frame, text="Generate Password", command=self.generate_password
+        ).grid(row=7, column=0, sticky=tk.W, pady=5)
+        ttk.Button(
+            main_frame, text="Copy to Clipboard", command=self.copy_to_clipboard
+        ).grid(row=7, column=1, sticky=tk.W, padx=5)
+        ttk.Button(main_frame, text="Use in Vault", command=self.use_in_vault).grid(
+            row=7, column=2, sticky=tk.W, padx=5
+        )
+
+        self.hibp_status_var = tk.StringVar()
+        ttk.Label(main_frame, textvariable=self.hibp_status_var).grid(
+            row=8, column=0, columnspan=2, sticky=tk.W, pady=5
+        )
+
+    def setup_hibp_tab(self):
+        main_frame = ttk.Frame(self.hibp_frame)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        ttk.Label(main_frame, text="Check Password Security:").pack(anchor=tk.W, pady=5)
+
+        self.check_pass_var = tk.StringVar()
+        check_entry = ttk.Entry(
+            main_frame,
+            textvariable=self.check_pass_var,
+            width=40,
+            show="•",
+            font=("Courier", 10),
+        )
+        check_entry.pack(fill=tk.X, pady=5)
+
+        ttk.Button(
+            main_frame, text="Check Password", command=self.check_password_breach
+        ).pack(anchor=tk.W, pady=5)
+
+        self.hibp_result_var = tk.StringVar()
+        ttk.Label(main_frame, textvariable=self.hibp_result_var, wraplength=400).pack(
+            anchor=tk.W, pady=10
+        )
+
+        self.show_hibp_pass_var = tk.BooleanVar()
+        ttk.Checkbutton(
+            main_frame,
+            text="Show Password",
+            variable=self.show_hibp_pass_var,
+            command=lambda: self.toggle_password_visibility_hibp(check_entry),
+        ).pack(anchor=tk.W)
+
+    def refresh_vault_list(self):
+        self.vault_listbox.delete(0, tk.END)
+        services = self.vault.list_services()
+        for service in sorted(services):
+            self.vault_listbox.insert(tk.END, service)
 
     def on_vault_select(self, event):
         selection = self.vault_listbox.curselection()
         if not selection:
             return
 
-        # PLACEHOLDER ...............................
+        service = self.vault_listbox.get(selection[0])
+        self.current_serivce = service
 
-    def toggle_password_visibility(self): ...  # Placeholder
+        entry = self.vault.get_entry(service)
+        if entry:
+            self.service_var.set(entry.service)
+            self.username_var.set(entry.username)
+            self.password_var.set(entry.password)
+            self.notes_text.delete(1.0, tk.END)
+            self.notes_text.insert(1.0, entry.notes)
 
-    def save_entry(self): ...  # Placeholdrer
+    def save_entry(self):
+        service = self.service_var.get().strip()
+        username = self.username_var.get().strip()
+        password = self.password_var.get()
+        notes = self.notes_text.get(1.0, tk.END).strip()
 
-    def new_entry(self): ...  # Placeholder
+        if not service or not username or not password:
+            messagebox.showerror("Error", "Service, username and password are required")
+            return
+
+        try:
+            entry = VaultEntryModel(
+                service=service, username=username, password=password, notes=notes
+            )
+
+            self.vault.add_entry(entry)
+            self.refresh_vault_list()
+            messagebox.showinfo("Success", "Entry saved successfully")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save entry: {str(e)}")
+
+    def new_entry(self):
+        self.current_serivce = None
+        self.service_var.set("")
+        self.username_var.set("")
+        self.password_var.set("")
+        self.notes_text.delete(1.0, tk.END)
+        self.vault_listbox.selection_clear(0, tk.END)
 
     def delete_entry(self): ...  # Placeholder
 
-    def refresh_vault_list(self): ...  # placeholder
+    def toggle_password_visibility(self):
+        if self.show_hibp_pass_var.get():
+            self.password_entry.config(show="")
+        else:
+            self.password_entry.config(show="•")
 
-    def secure_exit(self): ...  # placeholder
+    def toggle_password_visibility_hibp(self, entry_widget):
+        if self.show_hibp_pass_var.get():
+            entry_widget.config(show="")
+        else:
+            entry_widget.config(show="•")
+
+    def generate_password(self): ...  # Placeholder
+
+    def check_generated_password_breach(self): ...  # Placeholder
+
+    def copy_to_clipboard(self):
+        password = self.generated_pass_var.get()
+        if password:
+            self.app.clipboard_clear()
+            self.app.clipboard_append(password)
+            messagebox.showinfo("Success", "Password copied to vault form")
+
+    def use_in_vault(self): ...  # Placeholder
+
+    def check_password_breach(self): ...  # Placeholder
+
+    def secure_exit(self):
+        self.password_var.set("")
+        self.generated_pass_var.set("")
+        self.check_pass_var.set("")
+
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            self.app.destroy()
 
     def run(self):
         self.app.mainloop()
