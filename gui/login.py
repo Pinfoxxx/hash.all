@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import threading
-import socket
+
+from auth.auth import AuthManager
+from models.auth_model import UserLoginModel, UserRegModel, AuthRespModel
 
 from ..config import AppConfig
 
@@ -10,19 +12,13 @@ class LoginWindow:
 
     def __init__(self):
         self.app = tk.Tk()
-
-    # Get IP if possible, otherwise fallback (localhost / 127.0.0.1)
-    def get_client_ip(self) -> str:
-        try:
-            hostname = socket.gethostname()
-            return socket.gethostbyname(hostname)
-        except:
-            return "127.0.0.1"
+        self.auth_manager = AuthManager()
+        self.setup_gui()
 
     # GUI setup method
     def setup_gui(self):
         # Main attributes
-        ...  # title placeholder
+        self.app.title("hash.all - secure login")  # title placeholder
         self.app.geometry(AppConfig.DEFAULT_WINDOW_SIZE)
         self.app.resizable(False, False)
 
@@ -50,6 +46,10 @@ class LoginWindow:
         )
         self.register_btn.pack(pady=5)
 
+        # Attempts counter
+        self.attempts_label = ttk.Label(main_frame, text="", foreground="orange")
+        self.attempts_label.pack(pady=2)
+
         # Display status
         self.status_label = ttk.Label(main_frame, text="", foreground="red")
         self.status_label.pack(pady=5)
@@ -71,9 +71,29 @@ class LoginWindow:
 
         self.set_gui_state(disabled=True)
         self.status_label.config(text="Authenticating...")
+        self.attempts_label.config(text="")
 
         # Run auth thread method
-        def login_thread(): ...  # placeholder
+        def login_thread():
+            try:
+                login_data = UserLoginModel(username=username, password=password)
+                response = self.auth_manager.verify_user(login_data)
+
+                self.app.after(0, lambda: self.auth_callback(response))
+            except Exception as e:
+                self.app.after(
+                    0,
+                    lambda: self.auth_callback(
+                        AuthRespModel(
+                            success=False,
+                            message=f"Validation error: {str(e)}",
+                            remaining_attempts=None,
+                            lockout_time=None,
+                        )
+                    ),
+                )
+
+        threading.Thread(target=login_thread, daemon=True).start()
 
     def register(self):
         username = self.username_entry.get().strip()
@@ -86,9 +106,59 @@ class LoginWindow:
         self.set_gui_state(disabled=True)
         self.status_label.config(text="Registering...")
 
-        def register_thread(): ...  # placeholder
+        def register_thread():
+            try:
+                user_data = UserRegModel(username=username, password=password)
+                response = self.auth_manager.register_user(user_data)
+                self.app.after(0, lambda: self.register_callback)
+            except Exception as e:
+                self.app.after(
+                    0,
+                    lambda: self.register_callback(
+                        AuthRespModel(
+                            success=False,
+                            message=f"Validation error: {str(e)}",
+                            remaining_attempts=None,
+                            lockout_time=None,
+                        )
+                    ),
+                )
 
-    def auth_callback(self, response): ...  # placeholder
+    def auth_callback(self, response: AuthRespModel):
+        self.set_gui_state(disabled=False)
+
+        if response.success:
+            self.status_label.config(text="Login successful!", foreground="green")
+        else:
+            self.status_label.config(text=response.message, foreground="red")
+            self.password_entry.delete(0, tk.END)
+
+            if response.remaining_attempts is not None:
+                if response.remaining_attempts > 0:
+                    self.attempts_label.config(
+                        text=f"Remaining attempts: {response.remaining_attempts}",
+                        foreground="orange",
+                    )
+                elif response.lockout_time is not None:
+                    self.attempts_label.config(
+                        text=f"Account locked for {response.lockout_time} seconds",
+                        foreground="red",
+                    )
+                else:
+                    self.attempts_label.config(text="")
+
+    def register_callback(self, response: AuthRespModel):
+        self.set_gui_state(disabled=False)
+
+        if response.success:
+            self.status_label.config(
+                text="Registration successful!", foreground="green"
+            )
+            self.attempts_label.config(text="")
+        else:
+            self.status_label.config(text=response.message, foreground="red")
+            self.attempts_label.config(text="")
+            self.password_entry.delete(0, tk.END)
 
     # Foolproof n.2 (to make it impossible to spam requests)
     def set_gui_state(self, disabled: bool):
@@ -98,4 +168,11 @@ class LoginWindow:
         self.username_entry.config(state=state)
         self.password_entry.config(state=state)
 
-    def open_main_app(self): ...  # placeholder
+    def open_main_app(self):
+        self.app.destroy()
+        from .interface import MainApplication
+
+        app = MainApplication(
+            self.username_entry.get().strip(), self.password_entry.get()
+        )
+        app.run()
