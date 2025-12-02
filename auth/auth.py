@@ -1,4 +1,5 @@
 import os
+import hashlib
 import json
 import secrets
 import bcrypt
@@ -45,10 +46,12 @@ class AuthManager:
                 )
 
             pepper = self._get_pepper()
-            salted_password = user_data.password + pepper
+            salted_input = user_data.password + pepper
+
+            pre_hash = hashlib.sha256(salted_input.encode("utf-8")).hexdigest()
 
             hashed = bcrypt.hashpw(
-                salted_password.encode("utf-8"),
+                pre_hash.encode("utf-8"),
                 bcrypt.gensalt(rounds=SecurityConfig.BCRYPT_ROUNDS),
             )
 
@@ -96,10 +99,12 @@ class AuthManager:
 
             user_data = users[login_data.username]
             pepper = self._get_pepper()
-            salted_password = login_data.password + pepper
+            salted_input = login_data.password + pepper
+            pre_hash = hashlib.sha256(salted_input.encode("utf-8")).hexdigest()
 
             if bcrypt.checkpw(
-                salted_password.encode("utf-8"), user_data["hash"].encode("utf-8")
+                pre_hash.encode("utf-8"), 
+                user_data["hash"].encode("utf-8")
             ):
                 self.rate_limiter.clear_attempts(login_data.username)
                 return AuthRespModel(

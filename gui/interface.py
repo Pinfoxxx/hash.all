@@ -9,7 +9,7 @@ from models.vault_model import VaultEntryModel
 from pass_gen.pass_gen import PasswordGen
 from web_requests.hibp_api import HIBPClient
 
-from ..config import AppConfig
+from config import AppConfig
 
 
 class MainApplication:
@@ -40,17 +40,17 @@ class MainApplication:
 
         # Vault tab
         self.vault_frame = ttk.Frame(self.notebook)
-        # self.setup_vault_tab()
+        self.setup_vault_tab()
         self.notebook.add(self.vault_frame, text="Password Vault")
 
         # Password generator tab
         self.gen_frame = ttk.Frame(self.notebook)
-        # self.setup_gen_tab()
+        self.setup_gen_tab()
         self.notebook.add(self.vault_frame, text="Password Generator")
 
         # HIBP check tab
         self.hibp_frame = ttk.Frame(self.notebook)
-        # self.setup_hibp_tab()
+        self.setup_hibp_tab()
 
         self.notebook.add(self.vault_frame, text="Password Vault")
         self.notebook.add(self.gen_frame, text="Password Generator")
@@ -351,13 +351,19 @@ class MainApplication:
         self.hibp_result_var.set("Checking...")
 
         def check_thread():
-            count = self.hibp.check_password_breach(password)
-            if count > 0:
-                result = f"⚠️ This password has been found in {count} data breaches!\nDo NOT use this password!"
-            elif count == 0:
-                result = "✅ Password not found in known breaches"
-            else:
-                result = "❌ Could not check password (network error)"
+            try:
+                count = self.hibp.check_password_breach(password)
+                
+                if count > 0:
+                    result = f"⚠️ This password has been found in {count} data breaches!\nDo NOT use this password!"
+                elif count == 0:
+                    result = "✅ Password not found in known breaches"
+                else:
+                    result = "❌ Could not check password (network error)"
+            except Exception as e:
+                result = f"Error: {str(e)}"
+
+                self.app.after(0, lambda: self.hibp_result_var.set(result))
 
         threading.Thread(target=check_thread, daemon=True).start()
 

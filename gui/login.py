@@ -5,7 +5,7 @@ import threading
 from auth.auth import AuthManager
 from models.auth_model import UserLoginModel, UserRegModel, AuthRespModel
 
-from ..config import AppConfig
+from config import AppConfig
 
 
 class LoginWindow:
@@ -110,25 +110,31 @@ class LoginWindow:
             try:
                 user_data = UserRegModel(username=username, password=password)
                 response = self.auth_manager.register_user(user_data)
-                self.app.after(0, lambda: self.register_callback)
+
+                self.app.after(0, lambda r=response: self.register_callback(r))
+
             except Exception as e:
+                error_msg = f"Validation error: {str(e)}"
                 self.app.after(
                     0,
                     lambda: self.register_callback(
                         AuthRespModel(
                             success=False,
-                            message=f"Validation error: {str(e)}",
+                            message=error_msg,
                             remaining_attempts=None,
                             lockout_time=None,
                         )
                     ),
                 )
 
+        threading.Thread(target=register_thread, daemon=True).start()
+
     def auth_callback(self, response: AuthRespModel):
         self.set_gui_state(disabled=False)
 
         if response.success:
             self.status_label.config(text="Login successful!", foreground="green")
+            self.app.after(1000, self.open_main_app)
         else:
             self.status_label.config(text=response.message, foreground="red")
             self.password_entry.delete(0, tk.END)
@@ -169,13 +175,23 @@ class LoginWindow:
         self.password_entry.config(state=state)
 
     def open_main_app(self):
-        self.app.destroy()
-        from .interface import MainApplication
+        try:
+            print("--- Starting main app ---")
+            username = self.username_entry.get().strip()
+            password = self.password_entry.get()
 
-        app = MainApplication(
-            self.username_entry.get().strip(), self.password_entry.get()
-        )
-        app.run()
+            self.app.destroy()
+
+            print("Importing interface...")
+            from gui.interface import MainApplication
+
+            print("Starting app...")
+            app = MainApplication(username, password)
+            app.run()
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            print(f"Error: {e}")
 
     def run(self):
         self.app.mainloop()
