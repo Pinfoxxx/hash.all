@@ -190,6 +190,7 @@ class LoginWindow:
             app.run()
         except Exception as e:
             import traceback
+
             traceback.print_exc()
             print(f"Error: {e}")
 

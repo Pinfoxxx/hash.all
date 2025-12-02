@@ -41,8 +41,8 @@ class CryptoManager:
         del data
 
     def encrypt_data(self, data: str) -> str:
-        if not data:
-            raise ValueError("Data cannot be empty")
+        # if not data:
+        #     raise ValueError("Data cannot be empty")
         encrypted = self.fernet.encrypt(data.encode())
         return base64.b64encode(encrypted).decode()
 

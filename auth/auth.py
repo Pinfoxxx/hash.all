@@ -103,8 +103,7 @@ class AuthManager:
             pre_hash = hashlib.sha256(salted_input.encode("utf-8")).hexdigest()
 
             if bcrypt.checkpw(
-                pre_hash.encode("utf-8"), 
-                user_data["hash"].encode("utf-8")
+                pre_hash.encode("utf-8"), user_data["hash"].encode("utf-8")
             ):
                 self.rate_limiter.clear_attempts(login_data.username)
                 return AuthRespModel(

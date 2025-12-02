@@ -36,10 +36,12 @@ class VaultEntryModel(BaseSecureModel):
     )
 
     notes: str = Field(
-        ...,
+        default="",
+        min_length=0,
         max_length=1000,
         examples=["Work account"],
         description="Additional notes about this entry",
+        json_schema_extra={"skip_secure_validation": True},
     )
 
     created_at: float = Field(

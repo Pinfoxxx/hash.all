@@ -116,7 +116,7 @@ class MainApplication:
         ttk.Button(button_frame, text="Save Entry", command=self.save_entry).pack(
             side=tk.LEFT, padx=5
         )
-        ttk.Button(button_frame, text="New Entry", command=self.new_entry).pack(
+        ttk.Button(button_frame, text="Clear Entry", command=self.clear_entry).pack(
             side=tk.LEFT, padx=5
         )
         ttk.Button(button_frame, text="Delete Entry", command=self.delete_entry).pack(
@@ -264,7 +264,7 @@ class MainApplication:
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save entry: {str(e)}")
 
-    def new_entry(self):
+    def clear_entry(self):
         self.current_serivce = None
         self.service_var.set("")
         self.username_var.set("")
@@ -281,13 +281,13 @@ class MainApplication:
             try:
                 self.vault.delete_entry(self.current_serivce)
                 self.refresh_vault_list()
-                self.new_entry
+                self.clear_entry()
                 messagebox.showinfo("Success", "Entry deleted successfully")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to delete entry: {str(e)}")
 
     def toggle_password_visibility(self):
-        if self.show_hibp_pass_var.get():
+        if self.show_pass_var.get():
             self.password_entry.config(show="")
         else:
             self.password_entry.config(show="•")
@@ -353,7 +353,7 @@ class MainApplication:
         def check_thread():
             try:
                 count = self.hibp.check_password_breach(password)
-                
+
                 if count > 0:
                     result = f"⚠️ This password has been found in {count} data breaches!\nDo NOT use this password!"
                 elif count == 0:
@@ -363,7 +363,7 @@ class MainApplication:
             except Exception as e:
                 result = f"Error: {str(e)}"
 
-                self.app.after(0, lambda: self.hibp_result_var.set(result))
+            self.app.after(0, lambda: self.hibp_result_var.set(result))
 
         threading.Thread(target=check_thread, daemon=True).start()
 
@@ -379,7 +379,7 @@ class MainApplication:
         if password:
             self.notebook.select(0)
             self.password_var.set(password)
-            messagebox.showinfo("Success", "Passwoed copied to vault form")
+            messagebox.showinfo("Success", "Passwor1d copied to vault form")
 
     def secure_exit(self):
         self.password_var.set("")
