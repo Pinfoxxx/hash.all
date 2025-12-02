@@ -19,7 +19,9 @@ def setup_imports():
 
     # Check avaliable modules / logs if error
     try:
-        ...  # placeholder
+        from gui.login import LoginWindow
+
+        return True
     except ImportError as e:
         print(f"Import error: {e}")
         print(f"Project root: {project_root}")
@@ -37,7 +39,10 @@ def main():
 
     # Trying to initialize window / logs if error
     try:
-        ...  # placeholder
+        from gui.login import LoginWindow
+
+        login_window = LoginWindow()
+        login_window.run()
     except Exception as e:
         print(f"Critial error: {e}")
         sys.exit(1)

@@ -18,7 +18,7 @@ class LoginWindow:
     # GUI setup method
     def setup_gui(self):
         # Main attributes
-        self.app.title("hash.all - secure login")  # title placeholder
+        self.app.title("hash.all - secure login")
         self.app.geometry(AppConfig.DEFAULT_WINDOW_SIZE)
         self.app.resizable(False, False)
 
@@ -176,3 +176,6 @@ class LoginWindow:
             self.username_entry.get().strip(), self.password_entry.get()
         )
         app.run()
+
+    def run(self):
+        self.app.mainloop()
