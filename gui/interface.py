@@ -272,7 +272,19 @@ class MainApplication:
         self.notes_text.delete(1.0, tk.END)
         self.vault_listbox.selection_clear(0, tk.END)
 
-    def delete_entry(self): ...  # Placeholder
+    def delete_entry(self):
+        if not self.current_serivce:
+            messagebox.showerror("Error", "No entry selected")
+            return
+
+        if messagebox.askyesno("Confirm", f"Delete entry for {self.current_serivce}?"):
+            try:
+                self.vault.delete_entry(self.current_serivce)
+                self.refresh_vault_list()
+                self.new_entry
+                messagebox.showinfo("Success", "Entry deleted successfully")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to delete entry: {str(e)}")
 
     def toggle_password_visibility(self):
         if self.show_hibp_pass_var.get():
@@ -286,9 +298,68 @@ class MainApplication:
         else:
             entry_widget.config(show="•")
 
-    def generate_password(self): ...  # Placeholder
+    def generate_password(self):
+        try:
+            password = self.pass_gen.generate(
+                lenght=self.lenght_var.get(),
+                use_upper=self.upper_var.get(),
+                use_lower=self.lower_var.get(),
+                use_digits=self.digits_var.get(),
+                use_special=self.special_var.get(),
+            )
+            self.generated_pass_var.set(password)
+            self.hibp_status_var.set("Checking HIBP...")
 
-    def check_generated_password_breach(self): ...  # Placeholder
+            threading.Thread(
+                target=self.check_generated_password_breach, daemon=True
+            ).start()
+        except ValueError as e:
+            messagebox.showerror("Error", str(e))
+
+    def check_generated_password_breach(self):
+        password = self.generated_pass_var.get()
+        if password:
+            count = self.hibp.check_password_breach(password)
+            if count > 0:
+                self.app.after(
+                    0,
+                    lambda: self.hibp_status_var.set(
+                        f"⚠️ This password has been breached {count} times!"
+                    ),
+                )
+            elif count == 0:
+                self.app.after(
+                    0,
+                    lambda: self.hibp_status_var.set(
+                        "✅ Password not found in known breaches"
+                    ),
+                )
+            else:
+                self.app.after(
+                    0,
+                    lambda: self.hibp_status_var.set(
+                        "❌ Could not check HIBP (network error)"
+                    ),
+                )
+
+    def check_password_breach(self):
+        password = self.check_pass_var.get()
+        if not password:
+            messagebox.showerror("Error", "Please enter a password to check")
+            return
+
+        self.hibp_result_var.set("Checking...")
+
+        def check_thread():
+            count = self.hibp.check_password_breach(password)
+            if count > 0:
+                result = f"⚠️ This password has been found in {count} data breaches!\nDo NOT use this password!"
+            elif count == 0:
+                result = "✅ Password not found in known breaches"
+            else:
+                result = "❌ Could not check password (network error)"
+
+        threading.Thread(target=check_thread, daemon=True).start()
 
     def copy_to_clipboard(self):
         password = self.generated_pass_var.get()
@@ -297,9 +368,12 @@ class MainApplication:
             self.app.clipboard_append(password)
             messagebox.showinfo("Success", "Password copied to vault form")
 
-    def use_in_vault(self): ...  # Placeholder
-
-    def check_password_breach(self): ...  # Placeholder
+    def use_in_vault(self):
+        password = self.generated_pass_var.get()
+        if password:
+            self.notebook.select(0)
+            self.password_var.set(password)
+            messagebox.showinfo("Success", "Passwoed copied to vault form")
 
     def secure_exit(self):
         self.password_var.set("")
