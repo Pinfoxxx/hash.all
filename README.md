@@ -1,3 +1,3 @@
-# hash.all - free universal application for encryption and secure storage of passwords
-
-Under construction
+# hash.all
+Free universal application for encryption and secure storage of passwords. Written on Python 3 and based on Pydantic, Bcrypt, HIBP API, Tkinter (PyQt in near future) and more
+### !! test version !!
