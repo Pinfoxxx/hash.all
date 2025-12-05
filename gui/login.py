@@ -81,12 +81,13 @@ class LoginWindow:
 
                 self.app.after(0, lambda: self.auth_callback(response))
             except Exception as e:
+                error_msg = f"Validation error: {str(e)}"
                 self.app.after(
                     0,
                     lambda: self.auth_callback(
                         AuthRespModel(
                             success=False,
-                            message=f"Validation error: {str(e)}",
+                            message=error_msg,
                             remaining_attempts=None,
                             lockout_time=None,
                         )
@@ -161,6 +162,7 @@ class LoginWindow:
                 text="Registration successful!", foreground="green"
             )
             self.attempts_label.config(text="")
+            self.app.after(1000, self.open_main_app)
         else:
             self.status_label.config(text=response.message, foreground="red")
             self.attempts_label.config(text="")
