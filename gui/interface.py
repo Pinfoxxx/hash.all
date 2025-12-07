@@ -146,7 +146,7 @@ class MainApplication:
 
         self.lower_var = tk.BooleanVar(value=True)
         ttk.Checkbutton(
-            main_frame, text="Lowercase Letters (A-Z)", variable=self.lower_var
+            main_frame, text="Lowercase Letters (a-z)", variable=self.lower_var
         ).grid(row=2, column=0, sticky=tk.W, pady=2)
 
         self.digits_var = tk.BooleanVar(value=True)
