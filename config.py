@@ -25,7 +25,7 @@ class SecurityConfig:
 class AppConfig:
     # Base settings
     APP_NAME: ClassVar[str] = "hash.all"  # App name
-    VERSION: ClassVar[str] = "test version"  # App version
+    VERSION: ClassVar[str] = "0.5"  # App version
     DEFAULT_WINDOW_SIZE: ClassVar[str] = "800x600"  # App window_size
 
     # File permissions / only owner
