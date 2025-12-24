@@ -25,7 +25,7 @@ class SecurityConfig:
 class AppConfig:
     # Base settings
     APP_NAME: ClassVar[str] = "hash.all"  # App name
-    VERSION: ClassVar[str] = "placeholder"  # App version
+    VERSION: ClassVar[str] = "0.5"  # App version
     DEFAULT_WINDOW_SIZE: ClassVar[str] = "800x600"  # App window_size
 
     # File permissions / only owner
@@ -34,3 +34,6 @@ class AppConfig:
     # API settings
     HIBP_REQUEST_DELAY: ClassVar[float] = 1.6  # API requests delay
     HIBP_TIMEOUT: ClassVar[int] = 10  # API requests timeout
+
+    # Bypass settings
+    YANDEX_DIR: ClassVar[str] = "https://disk.yandex.ru/d/O22Pp0Anlf0rRA"
