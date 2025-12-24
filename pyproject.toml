@@ -1,6 +1,6 @@
 [project]
 name = "hash-all"
-version = "test version"
+version = "0.5"
 description = ""
 authors = [
     {name = "Pinfoxxx",email = "zhirileev.k@gmail.com"}
