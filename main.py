@@ -1,6 +1,6 @@
 """
 hash.all - Secure password manager
-ver 0.1.2a
+version 0.5
 """
 
 import sys

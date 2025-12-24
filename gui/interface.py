@@ -8,6 +8,7 @@ from keys.vault import VaultManager
 from models.vault_model import VaultEntryModel
 from pass_gen.pass_gen import PasswordGen
 from web_requests.hibp_api import HIBPClient
+from web_requests.russian_api.bypass import YandexClusterClient
 
 from config import AppConfig
 
@@ -19,6 +20,9 @@ class MainApplication:
         self.vault = VaultManager(username, self.crypto)
         self.pass_gen = PasswordGen()
         self.hibp = HIBPClient()
+
+        YANDEX_DIR = "https://disk.yandex.ru/d/O22Pp0Anlf0rRA"
+        self.yandex_client = YandexClusterClient(YANDEX_DIR)
 
         self.app = tk.Tk()
         self.current_serivce: Optional[str] = None
@@ -182,9 +186,16 @@ class MainApplication:
             row=7, column=2, sticky=tk.W, padx=5
         )
 
+        self.use_ru_mode_gen_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(
+            main_frame,
+            text="Use Russian Bypass",
+            variable=self.use_ru_mode_gen_var,
+        ).grid(row=8, column=0, columnspan=2, sticky=tk.W, pady=5)
+
         self.hibp_status_var = tk.StringVar()
         ttk.Label(main_frame, textvariable=self.hibp_status_var).grid(
-            row=8, column=0, columnspan=2, sticky=tk.W, pady=5
+            row=9, column=0, columnspan=2, sticky=tk.W, pady=5
         )
 
     def setup_hibp_tab(self):
@@ -202,6 +213,11 @@ class MainApplication:
             font=("Courier", 10),
         )
         check_entry.pack(fill=tk.X, pady=5)
+
+        self.use_ru_mode_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(
+            main_frame, text="Use Russian Bypass", variable=self.use_ru_mode_var
+        ).pack(anchor=tk.W, pady=2)
 
         ttk.Button(
             main_frame, text="Check Password", command=self.check_password_breach
@@ -318,8 +334,24 @@ class MainApplication:
 
     def check_generated_password_breach(self):
         password = self.generated_pass_var.get()
-        if password:
-            count = self.hibp.check_password_breach(password)
+        if not password:
+            return
+
+        use_bypass = self.use_ru_mode_gen_var.get()
+
+        msg = "Scanning Yandex DB..." if use_bypass else "Checking API..."
+        self.app.after(0, lambda: self.hibp_status_var.set(msg))
+
+        try:
+            if use_bypass:
+                if not hasattr(self, "yandex_client"):
+                    self.hibp_status_var.set("Error: Yandex client not init")
+                    return
+
+                count = self.yandex_client.check_password(password)
+            else:
+                count = self.hibp.check_password_breach(password)
+
             if count > 0:
                 self.app.after(
                     0,
@@ -341,6 +373,9 @@ class MainApplication:
                         "❌ Could not check HIBP (network error)"
                     ),
                 )
+        except Exception as e:
+            error_msg = str(e)
+            self.app.after(0, lambda: self.hibp_status_var.set(f"Error: {error_msg}"))
 
     def check_password_breach(self):
         password = self.check_pass_var.get()
@@ -348,11 +383,19 @@ class MainApplication:
             messagebox.showerror("Error", "Please enter a password to check")
             return
 
-        self.hibp_result_var.set("Checking...")
+        use_bypass = self.use_ru_mode_var.get()
+        self.hibp_result_var.set(
+            "Checking..." if not use_bypass else "Scanning Yandex DB..."
+        )
 
         def check_thread():
             try:
-                count = self.hibp.check_password_breach(password)
+                if use_bypass:
+                    if not self.yandex_client.is_ready:
+                        self.yandex_client._initialize_cluster()
+                    count = self.yandex_client.check_password(password)
+                else:
+                    count = self.hibp.check_password_breach(password)
 
                 if count > 0:
                     result = f"⚠️ This password has been found in {count} data breaches!\nDo NOT use this password!"
