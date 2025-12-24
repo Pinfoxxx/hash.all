@@ -8,7 +8,7 @@ from keys.vault import VaultManager
 from models.vault_model import VaultEntryModel
 from pass_gen.pass_gen import PasswordGen
 from web_requests.hibp_api import HIBPClient
-from web_requests.russian_api.bypass2 import YandexClusterClient
+from web_requests.russian_api.bypass import YandexClusterClient
 
 from config import AppConfig
 
