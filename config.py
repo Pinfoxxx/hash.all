@@ -34,3 +34,6 @@ class AppConfig:
     # API settings
     HIBP_REQUEST_DELAY: ClassVar[float] = 1.6  # API requests delay
     HIBP_TIMEOUT: ClassVar[int] = 10  # API requests timeout
+
+    # Bypass settings
+    YANDEX_DIR: ClassVar[str] = "https://disk.yandex.ru/d/O22Pp0Anlf0rRA"
