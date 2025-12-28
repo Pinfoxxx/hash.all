@@ -56,3 +56,4 @@ QGroupBox::title {
     left: 10px;
     padding: 0 3px 0 3px;
 }
+"""

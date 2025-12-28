@@ -31,7 +31,7 @@ class LoginWindow(QWidget):
         # Title
         title = QLabel("hash.all")
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("font-size: 24px; font_weight: bold; margin-bottom: 20px")
+        title.setStyleSheet("font-size: 24px; font-weight: bold; margin-bottom: 20px")
         layout.addWidget(title)
 
         # Input lines
