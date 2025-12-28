@@ -1,6 +1,5 @@
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
-    QApplication,
     QWidget,
     QVBoxLayout,
     QLabel,
@@ -23,7 +22,7 @@ class LoginWindow(QWidget):
         self.setWindowTitle("hash.all")
         self.setFixedSize(400, 350)
 
-        # Standard layout
+        # Default layout
         layout = QVBoxLayout()
         layout.setSpacing(15)
         layout.setAlignment(Qt.AlignCenter)
