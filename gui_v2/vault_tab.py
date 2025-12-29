@@ -93,9 +93,9 @@ class VaultTab(QWidget):
 
     def load_entry(self, item):
 
-        ####################################################
-        ## The function from vault will be connected here ##
-        ####################################################
+        ######################################################
+        ### The functions from APIs will be connected here ###
+        ######################################################
 
         print(f"Loading data for: {item.text()}")
         self.service_input.setText(item.text())
