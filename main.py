@@ -4,7 +4,6 @@ version 0.5
 """
 
 import sys
-import os
 from pathlib import Path
 
 
