@@ -2,12 +2,10 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
-    QHBoxLayout,
     QLabel,
     QLineEdit,
     QPushButton,
     QCheckBox,
-    QMessageBox,
 )
 
 
@@ -38,3 +36,21 @@ class CheckTab(QWidget):
                 QLineEdit.Normal if self.show.isChecked() else QLineEdit.Password
             )
         )
+        self.bypass = QCheckBox("Use russian bypass")
+
+        # Add checkboxes to layout
+        checkboxes.addWidget(self.show)
+        checkboxes.addWidget(self.bypass)
+        checkboxes.addStretch()
+        layout.addLayout(checkboxes)
+
+        # Buttons
+        self.check = QPushButton("Check password")
+
+        ######################################################
+        ### The functions from APIs will be connected here ###
+        ######################################################
+
+        # self.check.clicked.connect(self...)
+        layout.addWidget(self.check)
+        layout.addStretch()
