@@ -15,7 +15,7 @@ class CheckTab(QWidget):
 
         # Default layout
         layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignTop)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         layout.setSpacing(20)
         self.setLayout(layout)
 
@@ -25,22 +25,24 @@ class CheckTab(QWidget):
         # Password entry line
         self.input = QLineEdit()
         self.input.setPlaceholderText("Enter password to check...")
-        self.input.setEchoMode(QLineEdit.Password)
+        self.input.setEchoMode(QLineEdit.EchoMode.Password)
         layout.addWidget(self.input)
 
         # Checkboxes layout
         checkboxes = QVBoxLayout()
-        self.show = QCheckBox("Show password")
-        self.show.stateChanged.connect(
+        self.cb_show = QCheckBox("Show password")
+        self.cb_show.stateChanged.connect(
             lambda: self.input.setEchoMode(
-                QLineEdit.Normal if self.show.isChecked() else QLineEdit.Password
+                QLineEdit.EchoMode.Normal
+                if self.cb_show.isChecked()
+                else QLineEdit.EchoMode.Password
             )
         )
-        self.bypass = QCheckBox("Use russian bypass")
+        self.cb_bypass = QCheckBox("Use russian bypass")
 
         # Add checkboxes to layout
-        checkboxes.addWidget(self.show)
-        checkboxes.addWidget(self.bypass)
+        checkboxes.addWidget(self.cb_show)
+        checkboxes.addWidget(self.cb_bypass)
         checkboxes.addStretch()
         layout.addLayout(checkboxes)
 
