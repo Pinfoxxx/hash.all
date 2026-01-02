@@ -23,7 +23,7 @@ class VaultTab(QWidget):
         self.setLayout(layout)
 
         # Services list (Left side)
-        left = QVBoxLayout
+        left = QVBoxLayout()
         self.stored_services_label = QLabel("Stored services:")
         self.services_list = QListWidget()
 
@@ -33,13 +33,13 @@ class VaultTab(QWidget):
         # Form (Right side)
         right = QFrame()
         right_layout = QVBoxLayout(right)
-        right_layout.setAlignment(Qt.AlignTop)
+        right_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         # Form's fields
         self.service_input = QLineEdit()
         self.name_input = QLineEdit()
         self.pass_input = QLineEdit()
-        self.pass_input.setEchoMode(QLineEdit.Password)
+        self.pass_input.setEchoMode(QLineEdit.EchoMode.Password)
 
         self.show_pass = QCheckBox("Show password")
 
@@ -87,12 +87,11 @@ class VaultTab(QWidget):
 
     def toggle_password_visibility(self):
         if self.show_pass.isChecked():
-            self.pass_input.setEchoMode(QLineEdit.Normal)
+            self.pass_input.setEchoMode(QLineEdit.EchoMode.Normal)
         else:
-            self.pass_input.setEchoMode(QLineEdit.Password)
+            self.pass_input.setEchoMode(QLineEdit.EchoMode.Password)
 
     def load_entry(self, item):
-
         #####################################################
         ## The functions from vault will be connected here ##
         #####################################################
