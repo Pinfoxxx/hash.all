@@ -25,12 +25,12 @@ class LoginWindow(QWidget):
         # Default layout
         layout = QVBoxLayout()
         layout.setSpacing(15)
-        layout.setAlignment(Qt.AlignCenter)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setLayout(layout)
 
         # Title
         title = QLabel("hash.all")
-        title.setAlignment(Qt.AlignCenter)
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setStyleSheet("font-size: 24px; font-weight: bold; margin-bottom: 20px")
         layout.addWidget(title)
 
@@ -40,7 +40,7 @@ class LoginWindow(QWidget):
 
         self.pass_input = QLineEdit()
         self.pass_input.setPlaceholderText("Password")
-        self.pass_input.setEchoMode(QLineEdit.Password)
+        self.pass_input.setEchoMode(QLineEdit.EchoMode.Password)
 
         # Buttons
         self.login_button = QPushButton("Login")
@@ -56,21 +56,21 @@ class LoginWindow(QWidget):
         layout.addWidget(self.login_button)
         layout.addWidget(self.register_button)
 
-        def check_login(self):
-            username = self.name_input.text()
-            password = self.pass_input.text()
+    def check_login(self):
+        username = self.name_input.text()
+        password = self.pass_input.text()
 
-            ######################################################
-            ## The function from auth will be connected here ##
-            ######################################################
+        ######################################################
+        ## The function from auth will be connected here ##
+        ######################################################
 
-            if username and password:
-                self.success.emit()
-            else:
-                QMessageBox.warning(self, "Error", "Please enter username and password")
+        if username and password:
+            self.success.emit()
+        else:
+            QMessageBox.warning(self, "Error", "Please enter username and password")
 
-            def register_user(self):
-                print("Pressed register button")
-                QMessageBox.information(
-                    self, "Register", "placeholder for registation logic"
-                )  # The logic from auth will be here
+    def register_user(self):
+        print("Pressed register button")
+        QMessageBox.information(
+            self, "Register", "placeholder for registation logic"
+        )  # The logic from auth will be here

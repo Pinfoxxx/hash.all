@@ -16,7 +16,7 @@ class GeneratorTab(QWidget):
     def __init__(self):
         # Default layout
         layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignTop)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         layout.setSpacing(15)
         self.setLayout(layout)
 
@@ -26,25 +26,25 @@ class GeneratorTab(QWidget):
         # Spinbox
         self.spin = QSpinBox()
         self.spin.setRange(4, 128)
-        self.spin.setVault(16)
+        self.spin.setValue(16)
 
         # Checkboxes
-        self.upper = QCheckBox("Uppercase letters (A-Z)")
-        self.upper.setChecked(True)
-        self.lower = QCheckBox("Lowercase letters (a-z)")
-        self.lower.setChecked(True)
-        self.digits = QCheckBox("Digits (0-9)")
-        self.digits.setChecked(True)
-        self.special = QCheckBox("Special characters (!@#$%)")
-        self.special.setChecked(True)
+        self.cb_upper = QCheckBox("Uppercase letters (A-Z)")
+        self.cb_upper.setChecked(True)
+        self.cb_lower = QCheckBox("Lowercase letters (a-z)")
+        self.cb_lower.setChecked(True)
+        self.cb_digits = QCheckBox("Digits (0-9)")
+        self.cb_digits.setChecked(True)
+        self.cb_special = QCheckBox("Special characters (!@#$%)")
+        self.cb_special.setChecked(True)
 
         # Grid settings
         grid.addWidget(QLabel("Password lenght:"), 0, 0)
         grid.addWidget(self.spin, 0, 1)
-        grid.addWidget(self.upper, 1, 0)
-        grid.addWidget(self.lower, 2, 0)
-        grid.addWidget(self.digits, 3, 0)
-        grid.addWidget(self.special, 4, 0)
+        grid.addWidget(self.cb_upper, 1, 0)
+        grid.addWidget(self.cb_lower, 2, 0)
+        grid.addWidget(self.cb_digits, 3, 0)
+        grid.addWidget(self.cb_special, 4, 0)
 
         # Add grid to default layout
         layout.addLayout(grid)
