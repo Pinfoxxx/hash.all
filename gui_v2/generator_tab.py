@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 
 class GeneratorTab(QWidget):
     def __init__(self):
+        super().__init__()
         # Default layout
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)

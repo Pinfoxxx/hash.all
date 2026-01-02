@@ -13,8 +13,16 @@ class Runtime:
         self.app = QApplication(sys.argv)
         self.app.setStyleSheet(STYLES)
 
+        ############# TEST SECTION #############
+        # Uncomment/comment if you want/dont want to start main window
+        self.main_window = MainWindow()
+        self.main_window.show()
+
+        # Uncomment/comment if you want/dont want to start login window
         self.login_window = LoginWindow()
         self.login_window.show()
+        # self.login_window.success.connect(self.show_main_app)
+        ########################################
 
     def show_main_app(self):
         self.login_window.close()

@@ -23,4 +23,4 @@ class MainWindow(QMainWindow):
         # Add tabs
         self.tabs.addTab(self.vault, "Password vault")
         self.tabs.addTab(self.generator, "Password generator")
-        self.tabs.addTab(self.breach, "")
+        self.tabs.addTab(self.breach, "Check breaches")

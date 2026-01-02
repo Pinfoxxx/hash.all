@@ -38,7 +38,7 @@ class CheckTab(QWidget):
                 else QLineEdit.EchoMode.Password
             )
         )
-        self.cb_bypass = QCheckBox("Use russian bypass")
+        self.cb_bypass = QCheckBox("Use Russian bypass")
 
         # Add checkboxes to layout
         checkboxes.addWidget(self.cb_show)
