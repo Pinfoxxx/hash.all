@@ -69,7 +69,7 @@ class YandexClient:
             logger.warning(f"Can't refresh link for {file_data.name}: {e}")
         return None
 
-    def read_byte_chunk(self, url: str, start: str, end: int) -> Optional[bytes]:
+    def read_byte_chunk(self, url: str, start: int, end: int) -> Optional[bytes]:
         "Downloading chunk of file"
         headers = {"Range": f"bytes={start}-{end}"}
         try:
