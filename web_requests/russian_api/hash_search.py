@@ -4,7 +4,7 @@ import hashlib
 from typing import List, Optional
 
 from models.yandex_model import FileMetadata
-from yandex_api import YandexClient
+from .yandex_api import YandexClient
 
 logger = logging.getLogger(__name__)
 
