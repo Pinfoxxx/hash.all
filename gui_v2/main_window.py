@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QMainWindow, QTabWidget
 from vault_tab import VaultTab
 from generator_tab import GeneratorTab
 from breach_tab import CheckTab
+from settings_tab import SettingsTab
 
 
 class MainWindow(QMainWindow):
@@ -19,8 +20,10 @@ class MainWindow(QMainWindow):
         self.vault = VaultTab()
         self.generator = GeneratorTab()
         self.breach = CheckTab()
+        self.settings = SettingsTab()
 
         # Add tabs
         self.tabs.addTab(self.vault, "Password vault")
         self.tabs.addTab(self.generator, "Password generator")
         self.tabs.addTab(self.breach, "Check breaches")
+        self.tabs.addTab(self.settings, "Settings")
