@@ -1,5 +1,8 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QPushButton,
+    QSpinBox,
+    QDoubleSpinBox,
     QWidget,
     QVBoxLayout,
     QFormLayout,
@@ -8,7 +11,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
 )
 
-from config import AppConfig
+from config import AppConfig, SecurityConfig
 
 
 class SettingsTab(QWidget):
@@ -35,7 +38,7 @@ class SettingsTab(QWidget):
         scroll.setWidget(widget)
         layout.addWidget(scroll)
 
-        # App config settings group
+        # App settings group
         app_config = QGroupBox("Application settings")
         app_form = QFormLayout()
 
@@ -50,3 +53,68 @@ class SettingsTab(QWidget):
         self.version.setReadOnly(True)
         self.version.setStyleSheet("color: #888;")
         app_form.addRow("Version:", self.version)
+
+        # HIBP Delay (rw mode)
+        self.delay = QDoubleSpinBox()
+        self.delay.setRange(0.1, 10.0)
+        self.delay.setSingleStep(0.1)
+        self.delay.setValue(AppConfig.HIBP_REQUEST_DELAY)
+        app_form.addRow("HIBP API request delay (sec):", self.delay)
+
+        # HIBP Timeout (rw mode)
+        self.timeout = QSpinBox()
+        self.timeout.setRange(1, 60)
+        self.timeout.setValue(AppConfig.HIBP_TIMEOUT)
+        app_form.addRow("HIBP timeout (sec):", self.timeout)
+
+        # Add to layout
+        app_config.setLayout(app_form)
+        self.widget_layout.addWidget(app_config)
+
+        # Security settings group
+        security_config = QGroupBox("Security Configuration")
+        security_form = QFormLayout()
+
+        # PBKDF2 terations
+        self.iter = QSpinBox()
+        self.iter.setRange(1000, 9999999)
+        self.iter.setSingleStep(1000)
+        self.iter.setValue(SecurityConfig.PBKDF2_ITERATIONS)
+        security_form.addRow("PBKDF2 iterations:", self.iter)
+
+        # Bcrypt rounds
+        self.rounds = QSpinBox()
+        self.rounds.setRange(1, 31)
+        self.rounds.setValue(SecurityConfig.BCRYPT_ROUNDS)
+        security_form.addRow("Bcrypt rounds:", self.rounds)
+
+        # Salt size
+        self.salt_size = QSpinBox()
+        self.salt_size.setRange(8, 128)
+        self.salt_size.setValue(SecurityConfig.SALT_SIZE)
+        security_form.addRow("Salt size (bytes):", self.salt_size)
+
+        # Lockout duration
+        self.lockout = QSpinBox()
+        self.lockout.setRange(0, 86400)
+        self.lockout.setValue(SecurityConfig.LOCKOUT_DURATION)
+        security_form.addRow("Lockout duration (sec):", self.lockout)
+
+        # Add to layout
+        security_config.setLayout(security_form)
+        self.widget_layout.addWidget(security_config)
+
+        # Buttons
+        self.save = QPushButton("Save configuration")
+        self.save.setMinimumHeight(40)
+
+        ######### Placeholder #########
+        self.save.clicked.connect(self.save_settings)
+
+        # Add to layout
+        self.widget_layout.addStretch()
+        self.widget_layout.addWidget(self.save)
+
+    def save_settings(self):
+        "Placeholder"
+        print("Configuration saved")
