@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QGroupBox,
     QLineEdit,
     QScrollArea,
+    QComboBox,
 )
 
 from config import AppConfig, SecurityConfig
@@ -54,22 +55,35 @@ class SettingsTab(QWidget):
         self.version.setStyleSheet("color: #888;")
         app_form.addRow("Version:", self.version)
 
+        # Language selector (rw mode)
+        self.lang_selector = QComboBox()
+        self.lang_selector.addItems(["English", "Русский"])
+        app_form.addRow("Language:", self.lang_selector)
+
+        # Add to layout
+        app_config.setLayout(app_form)
+        self.widget_layout.addWidget(app_config)
+
+        # HIBP settings group
+        api_config = QGroupBox("API / HIBP configuration")
+        api_form = QFormLayout()
+
         # HIBP Delay (rw mode)
         self.delay = QDoubleSpinBox()
         self.delay.setRange(0.1, 10.0)
         self.delay.setSingleStep(0.1)
         self.delay.setValue(AppConfig.HIBP_REQUEST_DELAY)
-        app_form.addRow("HIBP API request delay (sec):", self.delay)
+        api_form.addRow("HIBP API request delay (sec):", self.delay)
 
         # HIBP Timeout (rw mode)
         self.timeout = QSpinBox()
         self.timeout.setRange(1, 60)
         self.timeout.setValue(AppConfig.HIBP_TIMEOUT)
-        app_form.addRow("HIBP timeout (sec):", self.timeout)
+        api_form.addRow("HIBP timeout (sec):", self.timeout)
 
         # Add to layout
-        app_config.setLayout(app_form)
-        self.widget_layout.addWidget(app_config)
+        api_config.setLayout(api_form)
+        self.widget_layout.addWidget(api_config)
 
         # Security settings group
         security_config = QGroupBox("Security Configuration")
