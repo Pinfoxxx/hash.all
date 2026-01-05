@@ -6,7 +6,7 @@ import os
 from typing import Optional
 
 from models.string_model import BaseSecureModel
-from config import SecurityConfig
+from gui_v2.config import SecurityConfig
 
 
 class CryptoConfig(BaseSecureModel):

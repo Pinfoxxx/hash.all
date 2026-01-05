@@ -11,7 +11,7 @@ from models.vault_model import (
     EncryptedVaultEntryModel,
 )
 from crypto.crypto import CryptoManager
-from config import AppConfig, SecurityConfig
+from gui_v2.config import AppConfig, SecurityConfig
 
 
 class VaultManager:

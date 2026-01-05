@@ -6,7 +6,7 @@ import bcrypt
 from pathlib import Path
 
 from models.auth_model import UserRegModel, UserLoginModel, AuthRespModel
-from config import SecurityConfig, AppConfig
+from gui_v2.config import SecurityConfig, AppConfig
 from .limiter import RateLimiter
 
 

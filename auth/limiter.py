@@ -3,14 +3,14 @@ import threading
 from typing import Any, Dict
 
 from models.auth_model import AuthRespModel
-from config import SecurityConfig
+from gui_v2.config import SecurityConfig
 
 
 class RateLimiter:
     def __init__(self):
-        self.failed_attempts: Dict[str, Dict[str, Any]] = (
-            {}
-        )  # Failed attempts. Key = username, Arg = count / first_attempt / last_attempt
+        self.failed_attempts: Dict[
+            str, Dict[str, Any]
+        ] = {}  # Failed attempts. Key = username, Arg = count / first_attempt / last_attempt
         self.lock = threading.RLock()  # Reentrant lock
         self.last_cleanup = time.time()  # Last cleanup time
 
