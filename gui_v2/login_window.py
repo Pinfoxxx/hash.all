@@ -84,9 +84,14 @@ class LoginWindow(QWidget):
             else:
                 # Login error
                 QMessageBox.warning(self, "Login Failed", response.message)
-
         except ValidationError as e:
-            QMessageBox.warning(
+            error_msg = e.errors()[0]["msg"] if e.errors() else str(e)
+
+            if "Value error" in error_msg:
+                error_msg = error_msg.split("Value error,")[1].strip()
+            QMessageBox.warning(self, "Invalid Data", error_msg)
+        except Exception as e:
+            QMessageBox.critical(
                 self, "Error", f"An unexpected error occurred: {str(e)}"
             )
 
