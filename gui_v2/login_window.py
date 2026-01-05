@@ -85,6 +85,7 @@ class LoginWindow(QWidget):
                 # Login error
                 QMessageBox.warning(self, "Login Failed", response.message)
         except ValidationError as e:
+            # Error handler, because pydantic v2 giving a detailed description of the error, which is unnecessary here
             error_msg = e.errors()[0]["msg"] if e.errors() else str(e)
 
             if "Value error" in error_msg:

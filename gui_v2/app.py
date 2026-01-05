@@ -10,29 +10,20 @@ from gui_v2.main_window import MainWindow
 # Main runtime
 class Runtime:
     def __init__(self):
+        # Initializing application and applying stylesheets
         self.app = QApplication(sys.argv)
         self.app.setStyleSheet(STYLES)
 
-        ############# TEST SECTION #############
-        # Uncomment/comment if you want/dont want to start main window
-        self.main_window = MainWindow()
-        self.main_window.show()
-
-        # Uncomment/comment if you want/dont want to start login window
+        # Initializing login window and waiting success signal
         self.login_window = LoginWindow()
+        self.login_window.success.connect(self.show_main_window)
         self.login_window.show()
-        # self.login_window.success.connect(self.show_main_app)
-        ########################################
 
-    def show_main_app(self):
+    def show_main_window(self):
+        # Closing login window and show main window
         self.login_window.close()
         self.main_window = MainWindow()
         self.main_window.show()
 
     def run(self):
         sys.exit(self.app.exec())
-
-
-if __name__ == "__main__":
-    process = Runtime()
-    process.run()
