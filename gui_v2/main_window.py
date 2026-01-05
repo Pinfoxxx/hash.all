@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import QMainWindow, QTabWidget
 
-from vault_tab import VaultTab
-from generator_tab import GeneratorTab
-from breach_tab import CheckTab
-from settings_tab import SettingsTab
+from gui_v2.vault_tab import VaultTab
+from gui_v2.generator_tab import GeneratorTab
+from gui_v2.breach_tab import CheckTab
+from gui_v2.settings_tab import SettingsTab
 
 
 class MainWindow(QMainWindow):

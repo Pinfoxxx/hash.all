@@ -7,6 +7,10 @@ from PySide6.QtWidgets import (
     QPushButton,
     QMessageBox,
 )
+from pydantic import ValidationError
+
+from auth.auth import AuthManager
+from models.auth_model import UserRegModel, UserLoginModel
 
 
 # Login window
@@ -17,6 +21,9 @@ class LoginWindow(QWidget):
 
     def __init__(self):
         super().__init__()
+
+        # Initializing AuthManager
+        self.auth_manager = AuthManager()
 
         # Root
         self.setWindowTitle("hash.all")
@@ -47,6 +54,9 @@ class LoginWindow(QWidget):
         self.register_button = QPushButton("Register")
         self.register_button.setStyleSheet("background-color: #555555")
 
+        self.login_button.clicked.connect(self.check_login)
+        self.register_button.clicked.connect(self.register_user)
+
         # Specific layouts
         layout.addWidget(QLabel("Username"))
         layout.addWidget(self.name_input)
@@ -60,17 +70,52 @@ class LoginWindow(QWidget):
         username = self.name_input.text()
         password = self.pass_input.text()
 
-        ######################################################
-        ## The function from auth will be connected here ##
-        ######################################################
-
-        if username and password:
-            self.success.emit()
-        else:
+        if not username or not password:
             QMessageBox.warning(self, "Error", "Please enter username and password")
+            return
+
+        try:
+            login_data = UserLoginModel(username=username, password=password)
+
+            response = self.auth_manager.verify_user(login_data)
+
+            if response.success:
+                self.success.emit()
+            else:
+                # Login error
+                QMessageBox.warning(self, "Login Failed", response.message)
+
+        except ValidationError as e:
+            QMessageBox.warning(
+                self, "Error", f"An unexpected error occurred: {str(e)}"
+            )
 
     def register_user(self):
-        print("Pressed register button")
-        QMessageBox.information(
-            self, "Register", "placeholder for registation logic"
-        )  # The logic from auth will be here
+        username = self.name_input.text()
+        password = self.pass_input.text()
+
+        if not username or not password:
+            QMessageBox.warning(
+                self, "Error", "Please enter username and password to register"
+            )
+            return
+        try:
+            reg_data = UserRegModel(username=username, password=password)
+
+            response = self.auth_manager.register_user(reg_data)
+
+            if response.success:
+                QMessageBox.information(self, "Success", response.message)
+            else:
+                QMessageBox.warning(self, "Registration Failed", response.message)
+        except ValidationError as e:
+            # Error handler, because pydantic v2 giving a detailed description of the error, which is unnecessary here
+            error_msg = e.errors()[0]["msg"] if e.errors() else str(e)
+
+            if "Value error" in error_msg:
+                error_msg = error_msg.split("Value error,")[1].strip()
+
+            QMessageBox.warning(self, "Invalid Data", error_msg)
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Registration error: {str(e)}")

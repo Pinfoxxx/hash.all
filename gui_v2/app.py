@@ -2,9 +2,9 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 
-from styles import STYLES
-from login_window import LoginWindow
-from main_window import MainWindow
+from gui_v2.styles import STYLES
+from gui_v2.login_window import LoginWindow
+from gui_v2.main_window import MainWindow
 
 
 # Main runtime

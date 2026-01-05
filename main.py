@@ -8,42 +8,30 @@ from pathlib import Path
 
 
 def setup_imports():
-
-    # Get the full path to the project dir
+    "Add root project dir into sys.path"
     project_root = Path(__file__).parent.absolute()
-
-    # Add this to sys.path if not in it
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
 
-    # Check avaliable modules / logs if error
-    try:
-        from gui.login import LoginWindow
-
-        return True
-    except ImportError as e:
-        print(f"Import error: {e}")
-        print(f"Project root: {project_root}")
-        print(f"Python path: {sys.path}")
-        return False
-
 
 def main():
+    "Main function"
+    # Setting up imports
+    setup_imports()
 
-    # Fail message
-    if not setup_imports():
-        print(
-            "Failed to setup imports. Please check\n1. All required files are present\n2. You have necessary permissions"
-        )
-
-    # Trying to initialize window / logs if error
     try:
-        from gui.login import LoginWindow
+        from gui_v2.app import Runtime
 
-        login_window = LoginWindow()
-        login_window.run()
+        # Creating object and run
+        app_instance = Runtime()
+        app_instance.run()
+    except ImportError as e:
+        print(f"Import error: {e}")
+        print(
+            "Make sure, that you run file from project root and all dependecies are installed"
+        )
     except Exception as e:
-        print(f"Critial error: {e}")
+        print(f"Critical error: {e}")
         sys.exit(1)
 
 

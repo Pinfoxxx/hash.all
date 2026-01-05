@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
     QComboBox,
 )
 
-from config import AppConfig, SecurityConfig
+from gui_v2.config import AppConfig, SecurityConfig
 
 
 class SettingsTab(QWidget):
