@@ -27,7 +27,8 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self.login_screen)
 
         # Set window size for login_window
-        self.resize(400, 350)
+        self.setFixedSize(400, 350)
+        self.center_window()
 
         # Protection from garbage collector (objects links)
         self.crypto_manager = None
@@ -38,6 +39,8 @@ class MainWindow(QMainWindow):
         username = self.login_screen.name_input.text()
         password = self.login_screen.pass_input.text()
         try:
+            print("Login successful. Initializing managers...")  # Just for debugging
+
             # Initializing CryptoManager
             self.crypto_manager = CryptoManager(password=password)
 
@@ -49,19 +52,33 @@ class MainWindow(QMainWindow):
             # Build main
             self.setup_main()
 
+            if self.stack.count() < 2:
+                raise Exception("Main interface tab was not added to stack!")
+
             # Switch screen
             self.stack.setCurrentIndex(1)
+            self.setMaximumSize(16777215, 16777215)
+            self.setMinimumSize(900, 600)
             self.resize(900, 600)
             self.center_window()
 
             # Clear password field in login window
             self.login_screen.pass_input.clear()
+            print("Transition complete.")
 
         except Exception as e:
+            print(f"CRITICAL ERROR in on_login_success: {e}")
+
+            import traceback
+
+            traceback.print_exc()
+
             QMessageBox.critical(
-                self, "Initializing error", f"Failed to load vault: {str(e)}"
+                self, "Initializing error", f"Failed to load vault:\n{str(e)}"
             )
             self.stack.setCurrentIndex(0)
+            self.setFixedSize(400, 350)
+            self.center_window()
 
     def setup_main(self):
         "Creating tabs and injecting dependencies"
@@ -89,6 +106,9 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.generator_tab, "Password generator")
         self.tabs.addTab(self.breach_tab, "Check breaches")
         self.tabs.addTab(self.settings_tab, "Settings")
+
+        # Add in stack
+        self.stack.addWidget(self.tabs)
 
     def center_window(self):
         "Center window"
