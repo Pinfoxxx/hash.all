@@ -103,7 +103,7 @@ class VaultTab(QWidget):
         self.delete_button.clicked.connect(self.delete_entry)
         self.refresh_button.clicked.connect(self.refresh_list)
 
-    def set_vault_maanger(self, manager: "VaultManager"):
+    def set_vault_manager(self, manager: "VaultManager"):
         "Dependency injection"
         self.vault_manager = manager
         self.refresh_list()
