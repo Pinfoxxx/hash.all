@@ -1,13 +1,12 @@
-from PySide6.QtWidgets import QMainWindow, QTabWidget, QStackedWidget, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QMessageBox, QStackedWidget, QTabWidget
 
-from gui_v2.login_window import LoginWindow
-from gui_v2.vault_tab import VaultTab
-from gui_v2.generator_tab import GeneratorTab
-from gui_v2.breach_tab import CheckTab
-from gui_v2.settings_tab import SettingsTab
-
-from keys.vault import VaultManager
 from crypto.crypto import CryptoManager
+from gui_v2.breach_tab import CheckTab
+from gui_v2.generator_tab import GeneratorTab
+from gui_v2.login_window import LoginWindow
+from gui_v2.settings_tab import SettingsTab
+from gui_v2.vault_tab import VaultTab
+from keys.vault import VaultManager
 
 
 class MainWindow(QMainWindow):
@@ -101,6 +100,10 @@ class MainWindow(QMainWindow):
         if self.vault_manager:
             self.vault_tab.set_vault_manager(self.vault_manager)
 
+        self.generator_tab.password_used_in_vault.connect(
+            self.on_password_from_generator
+        )
+
         # Add tabs
         self.tabs.addTab(self.vault_tab, "Password vault")
         self.tabs.addTab(self.generator_tab, "Password generator")
@@ -116,3 +119,9 @@ class MainWindow(QMainWindow):
         screen_center = self.screen().availableGeometry().center()
         frame_geometry.moveCenter(screen_center)
         self.move(frame_geometry.topLeft())
+
+    def on_password_from_generator(self, password):
+        "Switch to vault tab and paste password"
+        self.tabs.setCurrentIndex(0)
+        self.vault_tab.pass_input.setText(password)
+        self.vault_tab.pass_input.setFocus()
