@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 )
 
 from pass_gen.pass_gen import PasswordGen
+from web_requests.hibp_api import HIBPClient
 from web_requests.russian_api.hash_search import HashDBSearch
 
 
@@ -23,6 +24,15 @@ class GeneratorTab(QWidget):
 
     def __init__(self):
         super().__init__()
+
+        # Initializing API
+        self.hibp_api = HIBPClient()
+        # Russian database (debug-only)
+        self.ru_db = HashDBSearch("https://disk.yandex.ru/d/O22Pp0Anlf0rRA")
+        # Initializing gui
+        self.init_ui()
+
+    def init_ui(self):
         # Default layout
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -63,8 +73,14 @@ class GeneratorTab(QWidget):
         layout.addWidget(QLabel("Generated password:"))
         self.input = QLineEdit()
         self.input.setReadOnly(True)
-        self.input.setStyleSheet("font-size: 16px; font-weight: bold; color: #4da3df;")
+        self.input.setPlaceholderText("There will be a password here...")
+        self.input.setStyleSheet("font-size: 16px; padding: 5px;")
         layout.addWidget(self.input)
+
+        # Check status
+        self.status_label = QLabel("")
+        self.status_label.setStyleSheet("font-weight: bold;")
+        layout.addWidget(self.status_label)
 
         # Checkbox for bypass
         self.bypass = QCheckBox("Use Russian bypass")
@@ -85,45 +101,72 @@ class GeneratorTab(QWidget):
         layout.addLayout(buttons)
         layout.addStretch()
 
-        # Russian database (debug-only)
-        self.ru_db = HashDBSearch("https://disk.yandex.ru/d/O22Pp0Anlf0rRA")
-
         # Linking events
-        self.generate.clicked.connect(self.generate_password)
+        self.generate.clicked.connect(self.generation_handler)
         self.copy.clicked.connect(self.copy_to_clipboard)
         self.vault.clicked.connect(self.on_use_in_vault)
 
-    def generate_password(self):
+    def generation_handler(self):
         "Generate password"
-        lenght = self.spin.value()
-        opts = {
-            "use_upper": self.cb_upper.isChecked(),
-            "use_lower": self.cb_lower.isChecked(),
-            "use_digits": self.cb_digits.isChecked(),
-            "use_special": self.cb_special.isChecked(),
-        }
+
+        password = PasswordGen.generate(
+            lenght=self.spin.value(),
+            use_upper=self.cb_upper.isChecked(),
+            use_lower=self.cb_lower.isChecked(),
+            use_digits=self.cb_digits.isChecked(),
+            use_special=self.cb_special.isChecked(),
+        )  # Giving all arguments
+
+        self.input.setText(password)
+        self.status_label.setText("🔍 Checking password security...")
+        self.status_label.setStyleSheet("color: #4da3df;")
+
+        # Update UI
+        QApplication.processEvents()
+
+        # Checking through web requests
+        count = 0
+        api_name = ""
 
         try:
-            password = PasswordGen.generate(
-                lenght=lenght, **opts
-            )  # Giving all arguments
+            if self.bypass.isChecked():
+                # Russian db
+                api_name = "Russian DB"
+                if self.ru_db.is_ready:
+                    count = self.ru_db.check_password(password)
+                else:
+                    self.status_label.setText("❌  Russian DB is not initialized")
+                    return
+            else:
+                # HIBP db
+                api_name = "HIBP API"
+                count = self.hibp_api.check_password_breach(password)
 
-            self.input.setText(password)
+            if count == -1:  # Error
+                self.status_label.setText(f"⚠️ Connection error with {api_name}")
+                self.status_label.setStyleSheet("color: orange")
+            elif count > 0:  # No error, but still not good
+                self.status_label.setText(
+                    f"❌  Found in {count} breaches ({api_name})!"
+                )
+            else:
+                self.status_label.setText(f"✅ Secure (Verified via {api_name})")
+                self.status_label.setStyleSheet("color: #2ecc71;")
 
-        except ValueError as e:
-            QMessageBox.critical(self, "Error", str(e))
+        except Exception as e:
+            self.status_label.setText(f"⚠️ Error: {str(e)}")
 
     def copy_to_clipboard(self):
         "Copy to clipboard"
         if self.input.text():
             QApplication.clipboard().setText(self.input.text())
-        else:
-            QMessageBox.warning(self, "Warning", "Nothing to copy!")
+            QMessageBox.information(
+                self, "Success", "Password successfully copied to clipboard!"
+            )
 
     def on_use_in_vault(self):
         "Send password to main window for save in vault"
-        password = self.input.text()
-        if password:
-            self.password_used_in_vault.emit(password)
+        if self.input.text():
+            self.password_used_in_vault.emit(self.input.text())
         else:
-            QMessageBox.warning(self, "Warning", "Generate a password first!")
+            QMessageBox.warning(self, "Warning", "Please generate a password first.")
