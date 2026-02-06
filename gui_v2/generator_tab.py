@@ -118,7 +118,7 @@ class GeneratorTab(QWidget):
         )  # Giving all arguments
 
         self.input.setText(password)
-        self.status_label.setText("🔍 Checking password security...")
+        self.status_label.setText("🔍 Checking database, please wait...")
         self.status_label.setStyleSheet("color: #4da3df;")
 
         # Update UI
@@ -136,6 +136,7 @@ class GeneratorTab(QWidget):
                     count = self.ru_db.check_password(password)
                 else:
                     self.status_label.setText("❌  Russian DB is not initialized")
+                    self.status_label.setStyleSheet("color: #ff4d4d")
                     return
             else:
                 # HIBP db
@@ -144,11 +145,12 @@ class GeneratorTab(QWidget):
 
             if count == -1:  # Error
                 self.status_label.setText(f"⚠️ Connection error with {api_name}")
-                self.status_label.setStyleSheet("color: orange")
+                self.status_label.setStyleSheet("color: #ffa500")
             elif count > 0:  # No error, but still not good
                 self.status_label.setText(
                     f"❌  Found in {count} breaches ({api_name})!"
                 )
+                self.status_label.setStyleSheet("color:#ff4d4d;")
             else:
                 self.status_label.setText(f"✅ Secure (Verified via {api_name})")
                 self.status_label.setStyleSheet("color: #2ecc71;")
