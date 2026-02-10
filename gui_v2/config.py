@@ -1,80 +1,101 @@
 import json
 import os
+import platform
+import stat
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import ClassVar
 
-# Many of these constants are placeholders, but will be used soon
-
-
-# Security configuration
-class SecurityConfig:
-    PBKDF2_ITERATIONS: ClassVar[int] = 100000  # Count of iterations for PBKDF2
-    BCRYPT_ROUNDS: ClassVar[int] = 14  # Cost factor for bcrypt
-    MIN_PASSWORD_LENGHT: ClassVar[int] = 12  # Minimal password lenght
-    MAX_PASSWORD_LENGHT: ClassVar[int] = 128  # Maximum password lenght
-    SALT_SIZE: ClassVar[int] = 32  # Salt size in bytes
-    PEPPER_PATH: ClassVar[Path] = Path(".pepper")  # Path to pepper-file
-    VAULT_EXTENSION: ClassVar[str] = ".vault"  # Vault extension
-
-    # Rate limitting
-    MAX_LOGIN_ATTEMPTS: ClassVar[int] = 5  # Maximum login attempts
-    LOCKOUT_DURATION: ClassVar[int] = 900  # 15 minutes block
-    CLEANUP_INTERVAL: ClassVar[int] = 3600  # Cleanup after 60 minutes
+"""
+Explanation:
+    We use the .json file format to conveniently store user configuration settings.
+"""
 
 
-# App configuration
-class AppConfig:
-    # Base settings
-    APP_NAME: ClassVar[str] = "hash.all"  # App name
-    VERSION: ClassVar[str] = "0.5"  # App version
-    DEFAULT_WINDOW_SIZE: ClassVar[str] = "800x600"  # App window_size
-    LANGUAGE: ClassVar[str] = "English"
+@dataclass
+class Config:
+    """Main configuration dataclass (validation)"""
 
-    # File permissions / only owner
-    SECURE_FILE_MODE: ClassVar[int] = 0o600
+    # Safe limits (defaults)
+    PBKDF2_ITERATIONS: int = 100000
+    BCRYPT_ROUNDS: int = 14
+    MIN_PASSWORD_LENGHT: int = 12
+    MAX_PASSWORD_LENGHT: int = 128
+    SALT_SIZE: int = 32
+    PEPPER_PATH: str = ".pepper"
+    VAULT_EXTENSION: str = ".vault"
+    MAX_LOGIN_ATTEMPTS: int = 5
+    LOCKOUT_DURATION: int = 900
+    CLEANUP_INTERVAL: int = 3600
+
+    # Application settings
+    APP_NAME: str = "hash.all"
+    VERSION: str = "1.0b"
+    DEFAULT_WINDOW_SIZE: str = "800x600"
+    LANGUAGE: str = "English"
 
     # API settings
-    HIBP_REQUEST_DELAY: ClassVar[float] = 1.6  # API requests delay
-    HIBP_TIMEOUT: ClassVar[int] = 10  # API requests timeout
-
-    # Bypass settings
-    YANDEX_DIR: ClassVar[str] = "https://disk.yandex.ru/d/O22Pp0Anlf0rRA"
+    HIBP_REQUEST_DELAY: float = 1.6
+    HIBP_TIMEOUT: int = 10
+    YANDEX_DIR: str = "https://disk.yandex.ru/d/O22Pp0Anlf0rRA"
 
 
-def load_config():
-    "Load configation from file or create config file"
-    config_path = "settings.json"
-    if os.path.exists(config_path):
+class ConfigManager:
+    """Configration manager"""
+
+    def __init__(self):
+        self.config_dir = self._get_config_path()
+        self.config_file = self.config_dir / "config.json"
+        self.data = Config()
+        self.load()
+
+    def _get_config_path(self) -> Path:
+        home = Path.home()
+
+        if platform.system() == "Windows":  # Windows
+            path = Path(os.getenv("APPDATA", home / "AppData/Roaming")) / "hash.all"
+        else:  # Linux / MacOS and etc.
+            path = home / ".config" / "hash.all"
+
+        # Make dir with admin rights / 700 rights (only for owner)
+        if not path.exists():
+            path.mkdir(parents=True, exist_ok=True)
+            if platform.system() != "Windows":
+                os.chmod(path, stat.S_IRWXU)  # rights rwx------
+        return path
+
+    def load(self):
+        if self.config_file.exists():
+            try:
+                with open(self.config_file, "r", encoding="utf-8") as f:
+                    loaded_data = json.load(f)
+
+                    for key, value in loaded_data.items():
+                        if hasattr(self.data, key):
+                            setattr(self.data, key, value)
+            except Exception:
+                self.reset()  # Reset if file corrupted
+        else:
+            self.save()  # Otherwise we save it
+
+    def save(self):
         try:
-            with open(config_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            # Use a tempfile for write to avoid file corruption
+            temp_file = self.config_file.with_suffix(".tmp")
+            with open(temp_file, "w", encoding="utf-8") as f:
+                json.dump(asdict(self.data), f, indent=4)
 
-                # Loading AppConfig
-                app_data = data.get("AppConfig", {})
-                AppConfig.HIBP_REQUEST_DELAY = app_data.get(
-                    "HIBP_REQUEST_DELAY", AppConfig.HIBP_REQUEST_DELAY
-                )
-                AppConfig.HIBP_TIMEOUT = app_data.get(
-                    "HIBP_TIMEOUT", AppConfig.HIBP_TIMEOUT
-                )
-                AppConfig.LANGUAGE = app_data.get("LANGUAGE", AppConfig.LANGUAGE)
+            # Chmod for Linux / MacOS. Windows don't need this
+            if platform.system() != "Windows":
+                os.chmod(temp_file, stat.S_IRUSR | stat.S_IWUSR)  # rights rw-------
 
-                # Loading SecurityConfig
-                sec_data = data.get("SecurityConfig", {})
-                SecurityConfig.PBKDF2_ITERATIONS = sec_data.get(
-                    "PBKDF2_ITERATIONS", SecurityConfig.PBKDF2_ITERATIONS
-                )
-                SecurityConfig.BCRYPT_ROUNDS = sec_data.get(
-                    "BCRYPT_ROUNDS", SecurityConfig.BCRYPT_ROUNDS
-                )
-                SecurityConfig.SALT_SIZE = sec_data.get(
-                    "SALT_SIZE", SecurityConfig.SALT_SIZE
-                )
-                SecurityConfig.LOCKOUT_DURATION = sec_data.get(
-                    "LOCKOUT_DURATION", SecurityConfig.LOCKOUT_DURATION
-                )
+            os.replace(temp_file, self.config_file)
         except Exception as e:
-            print(f"Configuration saving error: {e}")
+            print(f"Critical error saving config: {e}")
+
+    def reset(self):
+        self.data = Config()
+        self.save()
 
 
-load_config()
+# Create an instance
+cfg = ConfigManager()
