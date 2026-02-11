@@ -7,12 +7,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 from gui_v2.config import cfg
-from models.string_model import BaseSecureModel
-
-
-class CryptoConfig(BaseSecureModel):
-    salt: bytes
-    iterations: int = cfg.data.PBKDF2_ITERATIONS
 
 
 class CryptoManager:
