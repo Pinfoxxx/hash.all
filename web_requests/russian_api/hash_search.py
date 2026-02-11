@@ -1,9 +1,10 @@
-import logging
 import hashlib
-
+import logging
 from typing import List, Optional
 
+from gui_v2.config import cfg
 from models.yandex_model import FileMetadata
+
 from .yandex_api import YandexClient
 
 logger = logging.getLogger(__name__)
@@ -15,15 +16,19 @@ class HashDBSearch:
     CHUNK_SIZE = 256
     MAX_STEPS = 60
 
-    def __init__(self, public_folder: str):
-        self.client = YandexClient(public_folder)
+    def __init__(self, public_folder: str = None):
+        # Take URL from config if not found
+        folder_url = public_folder if public_folder else cfg.data.YANDEX_DIR
+
+        self.client = YandexClient(folder_url)
         self.files: List[FileMetadata] = []
         self.is_ready = False
 
-        self._initialize()
+    def initialize(self):
+        """Initializing with error handler"""
+        if self.is_ready:
+            return
 
-    def _initialize(self):
-        "Initializing with error handler"
         logger.info("Database initializing...")
         self.files = self.client.get_files()
 
