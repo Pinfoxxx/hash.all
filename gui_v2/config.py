@@ -44,7 +44,9 @@ class ConfigManager:
 
     def __init__(self):
         self.config_dir = self._get_config_path()
-        self.config_file = self.config_dir / "config.json"
+        self.config_file = (
+            self.config_dir / "config_default.json"
+        )  # Load default config while user logging in
         self.data = Config()
         self.load()
 
@@ -62,6 +64,10 @@ class ConfigManager:
             if platform.system() != "Windows":
                 os.chmod(path, stat.S_IRWXU)  # rights rwx------
         return path
+
+    def load_user_config(self, username: str):
+        self.config_file = self.config_dir / f"config_{username}.json"
+        self.load()
 
     def load(self):
         if self.config_file.exists():
