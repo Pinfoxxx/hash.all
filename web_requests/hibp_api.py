@@ -1,16 +1,23 @@
 import hashlib
-import requests
 import time
+
+import requests
+
+from gui_v2.config import cfg
 
 
 class HIBPClient:
     # Setting API limits
     def __init__(self):
         self.last_request_time = 0
-        self.min_request_interval = 1.6
+        self.min_request_interval = cfg.data.HIBP_REQUEST_DELAY
+        self.timeout = cfg.data.HIBP_TIMEOUT
 
     # Another limits / counting time / antiblock-guard
     def _rate_limit(self):
+        # Update limits if the config has changed
+        self.min_request_interval = cfg.data.HIBP_REQUEST_DELAY
+
         current_time = time.time()
         time_since_last = current_time - self.last_request_time
         if time_since_last < self.min_request_interval:
@@ -33,7 +40,7 @@ class HIBPClient:
         try:
             response = requests.get(
                 f"https://api.pwnedpasswords.com/range/{prefix}",
-                timeout=10,
+                timeout=cfg.data.HIBP_TIMEOUT,
                 headers={"User-Agent": "hash.all-Password-Checker"},
             )
             response.raise_for_status()
