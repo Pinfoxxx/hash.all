@@ -1,7 +1,10 @@
+import traceback
+
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QStackedWidget, QTabWidget
 
 from crypto.crypto import CryptoManager
 from gui_v2.breach_tab import CheckTab
+from gui_v2.config import cfg
 from gui_v2.generator_tab import GeneratorTab
 from gui_v2.login_window import LoginWindow
 from gui_v2.settings_tab import SettingsTab
@@ -38,7 +41,9 @@ class MainWindow(QMainWindow):
         username = self.login_screen.name_input.text()
         password = self.login_screen.pass_input.text()
         try:
-            print("Login successful. Initializing managers...")  # Just for debugging
+            # print("Login successful. Initializing managers...")  # Just for debugging
+            cfg.load_user_config(username)
+            print(f"Loaded configuration for user: {username}")
 
             # Initializing CryptoManager
             self.crypto_manager = CryptoManager(password=password)
@@ -48,7 +53,7 @@ class MainWindow(QMainWindow):
                 username=username, crypto_manager=self.crypto_manager
             )
 
-            # Build main
+            # Build interface
             self.setup_main()
 
             if self.stack.count() < 2:
@@ -63,15 +68,13 @@ class MainWindow(QMainWindow):
 
             # Clear password field in login window
             self.login_screen.pass_input.clear()
-            print("Transition complete.")
+
+            # Update settings tab with user's values
+            if hasattr(self, "settings_tab"):
+                self.settings_tab.refresh_values()
 
         except Exception as e:
-            print(f"CRITICAL ERROR in on_login_success: {e}")
-
-            import traceback
-
             traceback.print_exc()
-
             QMessageBox.critical(
                 self, "Initializing error", f"Failed to load vault:\n{str(e)}"
             )
