@@ -1,54 +1,21 @@
-import re
 import time
 from datetime import datetime
 from typing import Dict
 
 from pydantic import Field, field_validator, model_validator
 
+from gui_v2.config import cfg
+
 from .string_model import BaseSecureModel, SecureString
 
 
 # Entry model for work with unencrypted data
 class VaultEntryModel(BaseSecureModel):
-    service: str = Field(
-        ...,
-        min_length=1,
-        max_length=100,
-        pattern=r"^[a-zA-Z0-9\s\.\-_]+$",
-        examples=["Google", "GitHub"],
-        description="Service name for the credentials",
-    )
-
-    username: str = Field(
-        ...,
-        min_length=1,
-        max_length=100,
-        examples=["john_doe123", "test@example.com"],
-        description="Username or email for the service",
-    )
-
-    password: str = Field(
-        ...,
-        min_length=1,
-        max_length=500,
-        examples=["SuperSecretPass123!"],
-        description="Password for the service",
-    )
-
-    notes: str = Field(
-        default="",
-        min_length=0,
-        max_length=1000,
-        examples=["Work account"],
-        description="Additional notes about this entry",
-        json_schema_extra={"skip_secure_validation": True},
-    )
-
-    created_at: float = Field(
-        default_factory=time.time,
-        examples=[1234567890.0],
-        description="Timestamp when entry created",
-    )
+    service: str = Field(..., min_length=1, max_length=100)
+    username: str = Field(..., min_length=1, max_length=100)
+    password: str = Field(..., examples=["SuperSecretPass123!"])
+    notes: str = Field(default="", json_schema_extra={"skip_secure_validation": True})
+    created_at: float = Field(default_factory=time.time)
 
     # Service validation
     @field_validator("service")
@@ -66,6 +33,10 @@ class VaultEntryModel(BaseSecureModel):
     @field_validator("password")
     @classmethod
     def validate_pwd(cls, v: str) -> str:
+        if len(v) > cfg.data.MAX_PASSWORD_LENGTH:
+            raise ValueError(
+                f"Password exceeds max length of {cfg.data.MAX_PASSWORD_LENGTH}"
+            )
         return SecureString.validate_secure_str(v, "Password")
 
     # Timestamp validation
@@ -87,27 +58,19 @@ class VaultEntryModel(BaseSecureModel):
 
 # Entry model for work with encrypted data
 class EncryptedVaultEntryModel(BaseSecureModel):
-    service: str = Field(..., examples=["Google"])  # Unencrypted
-    username: str = Field(..., examples=["encrypted_data..."])  # Encrypted
-    password: str = Field(..., examples=["encrypted_data..."])  # Encrypted
-    notes: str = Field(..., examples=["encrypted_data..."])  # Encrypted
-    created_at: float = Field(..., examples=[123456789.0])  # Unencrypted
+    service: str = Field(...)  # Unencrypted
+    username: str = Field(...)  # Encrypted
+    password: str = Field(...)  # Encrypted
+    notes: str = Field(...)  # Encrypted
+    created_at: float = Field(...)  # Unencrypted
 
 
 # Vault model for work with metadata
 class VaultMetadataModel(BaseSecureModel):
-    version: str = Field(default="1.0.0", examples=["1.0.0"])
-    created: float = Field(..., examples=[123456789.0])
-    last_modified: float = Field(default_factory=time.time, examples=[123456789.0])
-    entry_count: int = Field(default=0, ge=0, examples=[5])
-
-    # Version validatiom
-    @field_validator("version")
-    @classmethod
-    def validate_version(cls, v: str) -> str:
-        if not re.match(r"^\d+\.\d+\.\d+$", v):
-            raise ValueError("Version must be in semantic versioning format")
-        return v
+    version: str = Field(default="1.0.0")
+    created: float = Field(...)
+    last_modified: float = Field(default_factory=time.time)
+    entry_count: int = Field(default=0)
 
 
 # Vault model for work with all data (includes metadata)
