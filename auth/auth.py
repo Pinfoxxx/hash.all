@@ -4,7 +4,6 @@ import os
 import secrets
 import stat
 import time
-from pathlib import Path
 
 import bcrypt
 
@@ -15,24 +14,24 @@ from .limiter import RateLimiter
 
 
 class AuthManager:
-    def __init__(self, db_path: Path = Path("users.json")):
-        self.db_path = db_path
+    def __init__(self):
+        self.db_path = cfg.config_dir / "users.json"
         self.rate_limiter = RateLimiter()
         self._ensure_db_exists()
 
     def _ensure_db_exists(self):
-        if not self.db_path.exists():
-            with open(self.db_path, "w") as f:
-                json.dump({}, f)
-            # Set admin rights 600 rw (only for Linux / MacOS and etc.)
-            try:
-                self.db_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
-            # For Windows
-            except OSError:
-                pass
+        try:
+            if not self.db_path.exists():
+                with open(self.db_path, "w") as f:
+                    json.dump({}, f)
+                # Set admin rights 600 rw (only for Linux / MacOS and etc.)
+                if os.name != "nt":
+                    self.db_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+        except OSError as e:
+            print(f"Error creating DB: {e}")
 
     def _get_pepper(self) -> str:
-        pepper_path = Path(cfg.data.PEPPER_PATH)
+        pepper_path = cfg.config_dir / cfg.data.PEPPER_PATH
 
         if not pepper_path.exists():
             pepper = secrets.token_hex(32)
@@ -42,7 +41,10 @@ class AuthManager:
                 pepper_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
             except Exception as e:
                 print(f"Critical error: Could not save pepper: {e}")
-                return pepper
+                raise RuntimeError(
+                    "Security initialization failed: Could not save pepper file."
+                )
+            return pepper
 
         with open(pepper_path, "r") as f:
             return f.read().strip()
@@ -87,6 +89,10 @@ class AuthManager:
             temp_path = self.db_path.with_suffix(".tmp")
             with open(temp_path, "w") as f:
                 json.dump(users, f, indent=4)
+
+            if os.name != "nt":
+                os.chmod(temp_path, stat.S_IRUSR | stat.S_IWUSR)
+
             os.replace(temp_path, self.db_path)
 
             return AuthRespModel(
@@ -113,27 +119,38 @@ class AuthManager:
             return rate_response
 
         try:
-            if not self.db_path.exists():
-                return self.rate_limiter.rec_failed_attempt(login_data.username)
+            # Protection from timing attack (additional hash verification)
 
-            with open(self.db_path, "r") as f:
-                users = json.load(f)
+            target_hash = None
+            user_found = False
 
-            if login_data.username not in users:
-                return self.rate_limiter.rec_failed_attempt(login_data.username)
+            if self.db_path.exists():
+                with open(self.db_path, "r") as f:
+                    users = json.load(f)
+                    if login_data.username in users:
+                        target_hash = users[login_data.username]["hash"].encode("utf-8")
+                        user_found = True
 
-            user_data = users[login_data.username]
+            # If user not exist, use fake hash (fool hash)
+            if not target_hash:
+                fake_salt = bcrypt.gensalt(rounds=cfg.data.BCRYPT_ROUNDS)
+                target_hash = bcrypt.hashpw(b"dummy_password", fake_salt)
+
             pepper = self._get_pepper()
             salted_input = login_data.password + pepper
             pre_hash = hashlib.sha256(salted_input.encode("utf-8")).hexdigest()
 
-            if bcrypt.checkpw(
-                pre_hash.encode("utf-8"), user_data["hash"].encode("utf-8")
-            ):
+            is_valid = bcrypt.checkpw(
+                pre_hash.encode("utf-8"),
+                target_hash,
+            )
+
+            # Final logic checking
+            if user_found and is_valid:
                 self.rate_limiter.clear_attempts(login_data.username)
                 return AuthRespModel(
                     success=True,
-                    message="Login successfull",
+                    message="Login successful",
                     remaining_attempts=None,
                     lockout_time=None,
                 )
@@ -142,7 +159,7 @@ class AuthManager:
 
         except Exception as e:
             return AuthRespModel(
-                success=True,
+                success=False,
                 message=f"Authentication error: {str(e)}",
                 remaining_attempts=None,
                 lockout_time=None,
