@@ -62,9 +62,6 @@ class CryptoManager:
                 "Decryption failed - possible tampering or wrong key"
             ) from e
 
-    def get_config(self) -> CryptoConfig:
-        return CryptoConfig(salt=self.salt, iterations=cfg.data.PBKDF2_ITERATIONS)
-
     def __del__(self):
         if hasattr(self, "key"):
             try:
