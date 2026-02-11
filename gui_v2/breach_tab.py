@@ -18,10 +18,9 @@ class CheckTab(QWidget):
     def __init__(self):
         super().__init__()
 
-        # Initializing API
+        # Initializing APIs
         self.hibp_api = HIBPClient()
-        # Russian database (debug-only)
-        self.ru_db = HashDBSearch("https://disk.yandex.ru/d/O22Pp0Anlf0rRA")
+        self.ru_db = HashDBSearch()
         # Initializing gui
         self.init_ui()
 
@@ -98,6 +97,12 @@ class CheckTab(QWidget):
         try:
             if self.cb_bypass.isChecked():
                 api_name = "Russian DB"
+                if not self.ru_db.is_ready:
+                    self.status_label.setText(
+                        "⏳ Initializing Russian DB (one-time)..."
+                    )
+                    QApplication.processEvents()
+                    self.ru_db.initialize()
                 if self.ru_db.is_ready:
                     count = self.ru_db.check_password(password)
                 else:
