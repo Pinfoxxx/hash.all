@@ -1,6 +1,6 @@
+import random
 import secrets
 import string
-import random
 
 
 class PasswordGen:
@@ -31,8 +31,11 @@ class PasswordGen:
 
         # Getting the remaining length
         remaining_lenght = lenght - len([c for c in password if c])
-        password.extend(secrets.choice(characters) for _ in range(remaining_lenght))
+        if remaining_lenght < 0:
+            pass
+        else:
+            password.extend(secrets.choice(characters) for _ in range(remaining_lenght))
 
         # Mix up the password to make it more random
         random.shuffle(password)
-        return "".join(password)
+        return "".join(password)[:lenght]
