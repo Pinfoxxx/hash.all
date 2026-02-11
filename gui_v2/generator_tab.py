@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gui_v2.config import cfg
 from pass_gen.pass_gen import PasswordGen
 from web_requests.hibp_api import HIBPClient
 from web_requests.russian_api.hash_search import HashDBSearch
@@ -25,10 +26,9 @@ class GeneratorTab(QWidget):
     def __init__(self):
         super().__init__()
 
-        # Initializing API
+        # Initializing APIs
         self.hibp_api = HIBPClient()
-        # Russian database (debug-only)
-        self.ru_db = HashDBSearch("https://disk.yandex.ru/d/O22Pp0Anlf0rRA")
+        self.ru_db = HashDBSearch()
         # Initializing gui
         self.init_ui()
 
@@ -44,7 +44,7 @@ class GeneratorTab(QWidget):
 
         # Spinbox
         self.spin = QSpinBox()
-        self.spin.setRange(4, 128)
+        self.spin.setRange(cfg.data.MIN_PASSWORD_LENGTH, cfg.data.MAX_PASSWORD_LENGTH)
         self.spin.setValue(16)
 
         # Checkboxes
@@ -74,7 +74,6 @@ class GeneratorTab(QWidget):
         self.input = QLineEdit()
         self.input.setReadOnly(True)
         self.input.setPlaceholderText("There will be a password here...")
-        self.input.setStyleSheet("font-size: 16px; padding: 5px;")
         layout.addWidget(self.input)
 
         # Check status
@@ -109,13 +108,17 @@ class GeneratorTab(QWidget):
     def generation_handler(self):
         "Generate password"
 
-        password = PasswordGen.generate(
-            lenght=self.spin.value(),
-            use_upper=self.cb_upper.isChecked(),
-            use_lower=self.cb_lower.isChecked(),
-            use_digits=self.cb_digits.isChecked(),
-            use_special=self.cb_special.isChecked(),
-        )  # Giving all arguments
+        try:
+            password = PasswordGen.generate(
+                length=self.spin.value(),
+                use_upper=self.cb_upper.isChecked(),
+                use_lower=self.cb_lower.isChecked(),
+                use_digits=self.cb_digits.isChecked(),
+                use_special=self.cb_special.isChecked(),
+            )  # Giving all arguments
+        except ValueError as e:
+            self.status_label.setText(f"Error: {e}")
+            return
 
         self.input.setText(password)
         self.status_label.setText("🔍 Checking database, please wait...")
@@ -130,8 +133,14 @@ class GeneratorTab(QWidget):
 
         try:
             if self.bypass.isChecked():
-                # Russian db
+                # Russian DB
                 api_name = "Russian DB"
+                if not self.ru_db.is_ready:
+                    self.status_label.setText(
+                        "⏳ Initializing Russian DB (one-time)..."
+                    )
+                    QApplication.processEvents()
+                    self.ru_db.initialize()
                 if self.ru_db.is_ready:
                     count = self.ru_db.check_password(password)
                 else:
@@ -139,7 +148,7 @@ class GeneratorTab(QWidget):
                     self.status_label.setStyleSheet("color: #ff4d4d")
                     return
             else:
-                # HIBP db
+                # HIBP API
                 api_name = "HIBP API"
                 count = self.hibp_api.check_password_breach(password)
 
