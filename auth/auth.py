@@ -1,12 +1,16 @@
-import os
 import hashlib
 import json
+import os
 import secrets
-import bcrypt
+import stat
+import time
 from pathlib import Path
 
-from models.auth_model import UserRegModel, UserLoginModel, AuthRespModel
-from gui_v2.config import SecurityConfig, AppConfig
+import bcrypt
+
+from gui_v2.config import cfg
+from models.auth_model import AuthRespModel, UserLoginModel, UserRegModel
+
 from .limiter import RateLimiter
 
 
@@ -20,22 +24,39 @@ class AuthManager:
         if not self.db_path.exists():
             with open(self.db_path, "w") as f:
                 json.dump({}, f)
-            self.db_path.chmod(AppConfig.SECURE_FILE_MODE)
+            # Set admin rights 600 rw (only for Linux / MacOS and etc.)
+            try:
+                self.db_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+            # For Windows
+            except OSError:
+                pass
 
     def _get_pepper(self) -> str:
-        if not SecurityConfig.PEPPER_PATH.exists():
-            pepper = secrets.token_hex(32)
-            with open(SecurityConfig.PEPPER_PATH, "w") as f:
-                f.write(pepper)
-            SecurityConfig.PEPPER_PATH.chmod(AppConfig.SECURE_FILE_MODE)
+        pepper_path = Path(cfg.data.PEPPER_PATH)
 
-        with open(SecurityConfig.PEPPER_PATH, "r") as f:
+        if not pepper_path.exists():
+            pepper = secrets.token_hex(32)
+            try:
+                with open(pepper_path, "w") as f:
+                    f.write(pepper)
+                pepper_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+            except Exception as e:
+                print(f"Critical error: Could not save pepper: {e}")
+                return pepper
+
+        with open(pepper_path, "r") as f:
             return f.read().strip()
 
     def register_user(self, user_data: UserRegModel) -> AuthRespModel:
         try:
-            with open(self.db_path, "r") as f:
-                users = json.load(f)
+            if self.db_path.exists():
+                with open(self.db_path, "r") as f:
+                    try:
+                        users = json.load(f)
+                    except json.JSONDecodeError:
+                        users = {}
+            else:
+                users = {}
 
             if user_data.username in users:
                 return AuthRespModel(
@@ -48,24 +69,25 @@ class AuthManager:
             pepper = self._get_pepper()
             salted_input = user_data.password + pepper
 
+            # SHA-256 pre-hash
             pre_hash = hashlib.sha256(salted_input.encode("utf-8")).hexdigest()
 
+            # Bcrypt hash
             hashed = bcrypt.hashpw(
                 pre_hash.encode("utf-8"),
-                bcrypt.gensalt(rounds=SecurityConfig.BCRYPT_ROUNDS),
+                bcrypt.gensalt(rounds=cfg.data.BCRYPT_ROUNDS),
             )
 
             users[user_data.username] = {
                 "hash": hashed.decode("utf-8"),
-                "created_at": (
-                    os.path.getctime(self.db_path)
-                    if self.db_path.exists()
-                    else os.path.getctime(__file__)
-                ),
+                "created_at": time.time(),
             }
 
-            with open(self.db_path, "w") as f:
-                json.dump(users, f)
+            # Atomic write
+            temp_path = self.db_path.with_suffix(".tmp")
+            with open(temp_path, "w") as f:
+                json.dump(users, f, indent=4)
+            os.replace(temp_path, self.db_path)
 
             return AuthRespModel(
                 success=True,
@@ -91,6 +113,9 @@ class AuthManager:
             return rate_response
 
         try:
+            if not self.db_path.exists():
+                return self.rate_limiter.rec_failed_attempt(login_data.username)
+
             with open(self.db_path, "r") as f:
                 users = json.load(f)
 
