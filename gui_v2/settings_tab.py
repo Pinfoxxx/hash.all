@@ -1,4 +1,3 @@
-from config import cfg
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QComboBox,
@@ -14,6 +13,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from gui_v2.config import cfg
 
 
 class SettingsTab(QWidget):
@@ -66,8 +67,11 @@ class SettingsTab(QWidget):
         self.widget_layout.addStretch()
         self.widget_layout.addLayout(buttons_layout)
 
+        # Initial loading
+        self._load_values()
+
     def _setup_ui_groups(self):
-        "Setting up ui groups"
+        """Setting up ui groups"""
 
         # Application settings
         app_config = QGroupBox("Application settings")
@@ -134,6 +138,10 @@ class SettingsTab(QWidget):
         self.rounds.setValue(d.BCRYPT_ROUNDS)
         self.salt_size.setValue(d.SALT_SIZE)
         self.lockout.setValue(d.LOCKOUT_DURATION)
+
+    def refresh_values(self):
+        """Public method to force refresh UI from config object"""
+        self._load_values()
 
     def save_settings(self):
         """Read data from UI and save in file"""
