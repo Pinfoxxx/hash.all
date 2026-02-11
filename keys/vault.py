@@ -141,8 +141,3 @@ class VaultManager:
             self._save_vault(vault_data)
             return True
         return False
-
-    # Get metadata from vault
-    def get_vault_info(self) -> VaultMetadataModel:
-        vault_data = self._load_vault()
-        return vault_data.metadata
