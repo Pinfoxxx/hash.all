@@ -230,4 +230,8 @@ class SettingsTab(QWidget):
             translate.load_language()
             self.retranslate_ui()
 
-            QMessageBox.information(self, "Reset", "Settings have been reset.")
+        QMessageBox.information(
+            self,
+            translate.get_translation("reset_success_title"),
+            translate.get_translation("reset_success_msg"),
+        )
