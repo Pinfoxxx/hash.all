@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
+    QLabel,
     QLineEdit,
     QMessageBox,
     QPushButton,
@@ -15,6 +16,7 @@ from PySide6.QtWidgets import (
 )
 
 from gui_v2.config import cfg
+from gui_v2.translator import translate
 
 
 class SettingsTab(QWidget):
@@ -40,21 +42,21 @@ class SettingsTab(QWidget):
         scroll.setWidget(widget)
         layout.addWidget(scroll)
 
-        # Setting up ui groups
-        self._setup_ui_groups()
+        # Create widgets without text
+        self._setup_ui_elements()
 
         # Buttons layout
         buttons_layout = QHBoxLayout()
 
         # Buttons
-        self.save_btn = QPushButton("Save configuration")
+        self.save_btn = QPushButton()
         self.save_btn.setMinimumHeight(40)
         self.save_btn.setStyleSheet(
             "background-color: #4da3df; color: white; font-weight: bold;"
         )
         self.save_btn.clicked.connect(self.save_settings)
 
-        self.reset_btn = QPushButton("Reset to defaults")
+        self.reset_btn = QPushButton()
         self.reset_btn.setMinimumHeight(40)
         self.reset_btn.setStyleSheet("background-color: #555; color: white;")
         self.reset_btn.clicked.connect(self.reset_settings)
@@ -67,14 +69,17 @@ class SettingsTab(QWidget):
         self.widget_layout.addStretch()
         self.widget_layout.addLayout(buttons_layout)
 
+        # Apply translate
+        self.retranslate_ui()
+
         # Initial loading
         self._load_values()
 
-    def _setup_ui_groups(self):
+    def _setup_ui_elements(self):
         """Setting up ui groups"""
 
         # Application settings
-        app_config = QGroupBox("Application settings")
+        self.app_config = QGroupBox()
         app_form = QFormLayout()
         self.app_name = QLineEdit()
         self.app_name.setReadOnly(True)
@@ -83,29 +88,38 @@ class SettingsTab(QWidget):
         self.lang_selector = QComboBox()
         self.lang_selector.addItems(["English", "Русский"])
 
+        # Create links to labels for text switching
+        self.label_app_name = QLabel()
+        self.label_version = QLabel()
+        self.label_lang = QLabel()
+
         # Add in widget layout
-        app_form.addRow("App name:", self.app_name)
-        app_form.addRow("Version:", self.version)
-        app_form.addRow("Language:", self.lang_selector)
-        app_config.setLayout(app_form)
-        self.widget_layout.addWidget(app_config)
+        app_form.addRow(self.label_app_name, self.app_name)
+        app_form.addRow(self.label_version, self.version)
+        app_form.addRow(self.label_lang, self.lang_selector)
+        self.app_config.setLayout(app_form)
+        self.widget_layout.addWidget(self.app_config)
 
         # API settings
-        api_config = QGroupBox("API / HIBP configuration")
+        self.api_config = QGroupBox()
         api_form = QFormLayout()
+
+        self.label_delay = QLabel()
+        self.label_timeout = QLabel()
+
         self.delay = QDoubleSpinBox()
         self.delay.setRange(0.1, 10.0)
         self.timeout = QSpinBox()
         self.timeout.setRange(1, 60)
 
         # Add in widget layout
-        api_form.addRow("HIBP API request delay (sec):", self.delay)
-        api_form.addRow("HIBP timeout (sec):", self.timeout)
-        api_config.setLayout(api_form)
-        self.widget_layout.addWidget(api_config)
+        api_form.addRow(self.label_delay, self.delay)
+        api_form.addRow(self.label_timeout, self.timeout)
+        self.api_config.setLayout(api_form)
+        self.widget_layout.addWidget(self.api_config)
 
         # Security settings
-        security_config = QGroupBox("Security Configuration")
+        self.security_config = QGroupBox()
         security_form = QFormLayout()
         self.iter = QSpinBox()
         self.iter.setRange(1000, 9999999)
@@ -116,16 +130,42 @@ class SettingsTab(QWidget):
         self.lockout = QSpinBox()
         self.lockout.setRange(0, 86400)
 
+        self.label_iter = QLabel()
+        self.label_rounds = QLabel()
+        self.label_salt = QLabel()
+        self.label_lockout = QLabel()
+
         # Add in widget layout
-        security_form.addRow("PBKDF2 iterations:", self.iter)
-        security_form.addRow("Bcrypt rounds:", self.rounds)
-        security_form.addRow("Salt size (bytes):", self.salt_size)
-        security_form.addRow("Lockout duration (sec):", self.lockout)
-        security_config.setLayout(security_form)
-        self.widget_layout.addWidget(security_config)
+        security_form.addRow(self.label_iter, self.iter)
+        security_form.addRow(self.label_rounds, self.rounds)
+        security_form.addRow(self.label_salt, self.salt_size)
+        security_form.addRow(self.label_lockout, self.lockout)
+        self.security_config.setLayout(security_form)
+        self.widget_layout.addWidget(self.security_config)
+
+    def retranslate_ui(self):
+        """Update all texts in ui"""
+        # Group's titles
+        self.app_config.setTitle(translate.get_translation("app_settings"))
+        self.api_config.setTitle(translate.get_translation("api_settings"))
+        self.security_config.setTitle(translate.get_translation("security_settings"))
+
+        # Form's labels
+        self.label_app_name.setText(translate.get_translation("app_name"))
+        self.label_version.setText((translate.get_translation("version")))
+        self.label_lang.setText(translate.get_translation("language"))
+        self.label_delay.setText(translate.get_translation("hibp_api_delay"))
+        self.label_timeout.setText(translate.get_translation("hibp_timeout"))
+        self.label_iter.setText(translate.get_translation("pbkdf2_iterations"))
+        self.label_salt.setText(translate.get_translation("salt_size"))
+        self.label_lockout.setText(translate.get_translation("lockout"))
+
+        # Buttongs texts
+        self.save_btn.setText(translate.get_translation("save_btn"))
+        self.save_btn.setText(translate.get_translation("reset_btn"))
 
     def _load_values(self):
-        "Fill widgets with data from cfg.data"
+        """Fill widgets with data from cfg.data"""
         d = cfg.data
 
         # Set defaults from cfg
@@ -145,7 +185,10 @@ class SettingsTab(QWidget):
 
     def save_settings(self):
         """Read data from UI and save in file"""
-        cfg.data.LANGUAGE = self.lang_selector.currentText()
+        old_lang = cfg.data.LANGUAGE
+        new_lang = self.lang_selector.currentText()
+
+        cfg.data.LANGUAGE = new_lang
         cfg.data.HIBP_REQUEST_DELAY = self.delay.value()
         cfg.data.HIBP_TIMEOUT = self.timeout.value()
         cfg.data.PBKDF2_ITERATIONS = self.iter.value()
@@ -155,18 +198,36 @@ class SettingsTab(QWidget):
 
         # Save config
         cfg.save()
-        QMessageBox.information(self, "Success", "Configuration saved sucessfully!")
+
+        if old_lang != new_lang:
+            translate.load_language()
+            self.retranslate_ui()
+
+            QMessageBox.information(
+                self,
+                translate.get_translation("success_title"),
+                translate.get_translation("language_changed_msg"),
+            )
+        else:
+            QMessageBox.information(
+                self,
+                translate.get_translation("success_title"),
+                translate.get_translation("success_msg"),
+            )
 
     def reset_settings(self):
         """Resetting the settings and loading them into the UI"""
         reply = QMessageBox.question(
             self,
-            "Confirm reset",
-            "Are you sure want to reset all settings to defaults?",
+            translate.get_translation("confirm_reset_title"),
+            translate.get_translation("confirm_reset_msg"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
 
         if reply == QMessageBox.StandardButton.Yes:
             cfg.reset()
             self._load_values()
+            translate.load_language()
+            self.retranslate_ui()
+
             QMessageBox.information(self, "Reset", "Settings have been reset.")
