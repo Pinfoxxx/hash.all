@@ -1,0 +1,23 @@
+ {
+    "app_settings": "Application settings",
+    "api_settings": "API / HIBP configuration",
+    "security_settings": "Security configuration",
+    "app_name": "App name:",
+    "version": "Version:",
+    "language": "Language:",
+    "hibp_api_delay": "HIBP API request delay (sec):",
+    "hibp_timeout": "HIBP timeout (sec):",
+    "pbkdf2_iterations": "PBKDF2 iterations:",
+    "bcrypt_rounds": "Bcrypt rounds:",
+    "salt_size": "Salt size (bytes):",
+    "lockout": "Lockout duration (sec):",
+    "save_btn": "Save configuration",
+    "reset_btn": "Reset to defaults",
+    "success_title": "Success",
+    "success_msg": "Configuration saved successfully!",
+    "language_changed_msg": "Configuration saved. UI language updated.",
+    "confirm_reset_title": "Confirm reset",
+    "confirm_reset_msg": "Are you sure want to reset all settings to defaults?",
+    "reset_success_title": "Reset",
+    "reset_success_msg": "Settings have been reset."
+} 
