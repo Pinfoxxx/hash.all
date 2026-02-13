@@ -157,12 +157,13 @@ class SettingsTab(QWidget):
         self.label_delay.setText(translate.get_translation("hibp_api_delay"))
         self.label_timeout.setText(translate.get_translation("hibp_timeout"))
         self.label_iter.setText(translate.get_translation("pbkdf2_iterations"))
+        self.label_rounds.setText(translate.get_translation("bcrypt_rounds"))
         self.label_salt.setText(translate.get_translation("salt_size"))
         self.label_lockout.setText(translate.get_translation("lockout"))
 
-        # Buttongs texts
+        # Buttons texts
         self.save_btn.setText(translate.get_translation("save_btn"))
-        self.save_btn.setText(translate.get_translation("reset_btn"))
+        self.reset_btn.setText(translate.get_translation("reset_btn"))
 
     def _load_values(self):
         """Fill widgets with data from cfg.data"""
