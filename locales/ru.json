@@ -1,0 +1,23 @@
+{
+    "app_settings": "Настройки приложения",
+    "api_settings": "Настройки API / HIBP",
+    "security_settings": "Настройки безопасности",
+    "app_name": "Имя приложения:",
+    "version": "Версия:",
+    "language": "Язык:",
+    "hibp_api_delay": "Задержка запроса HIBP (сек):",
+    "hibp_timeout": "Тайм-аут HIBP (сек):",
+    "pbkdf2_iterations": "Итерации PBKDF2:",
+    "bcrypt_rounds": "Раунды Bcrypt:",
+    "salt_size": "Размер соли (байт):",
+    "lockout": "Время блокировки (сек):",
+    "save_btn": "Сохранить настройки",
+    "reset_btn": "Сбросить настройки",
+    "success_title": "Успешно",
+    "success_msg": "Конфигурация успешно сохранена!",
+    "language_changed_msg": "Конфигурация сохранена. Язык интерфейса обновлен.",
+    "confirm_reset_title": "Подтверждение сброса",
+    "confirm_reset_msg": "Вы уверены, что хотите сбросить все настройки к значениям по умолчанию?",
+    "reset_success_title": "Сброс",
+    "reset_success_msg": "Настройки были сброшены."
+}
