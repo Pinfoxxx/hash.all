@@ -28,7 +28,7 @@ class Config:
     CLEANUP_INTERVAL: int = 3600
 
     # Application settings
-    APP_NAME: str = "hash.all"
+    APP_NAME: str = "hash.all (test branch)"
     VERSION: str = "1.0b"
     DEFAULT_WINDOW_SIZE: str = "800x600"
     LANGUAGE: str = "English"
