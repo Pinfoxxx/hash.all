@@ -1,12 +1,12 @@
+import random
 import secrets
 import string
-import random
 
 
 class PasswordGen:
     @staticmethod
     def generate(
-        lenght=16, use_upper=True, use_lower=True, use_digits=True, use_special=True
+        length=16, use_upper=True, use_lower=True, use_digits=True, use_special=True
     ):
         characters = ""
         if use_upper:  # "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -30,9 +30,12 @@ class PasswordGen:
         ]
 
         # Getting the remaining length
-        remaining_lenght = lenght - len([c for c in password if c])
-        password.extend(secrets.choice(characters) for _ in range(remaining_lenght))
+        remaining_length = length - len([c for c in password if c])
+        if remaining_length < 0:
+            pass
+        else:
+            password.extend(secrets.choice(characters) for _ in range(remaining_length))
 
         # Mix up the password to make it more random
         random.shuffle(password)
-        return "".join(password)
+        return "".join(password)[:length]

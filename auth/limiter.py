@@ -1,34 +1,34 @@
-import time
 import threading
-from typing import Any, Dict
+import time
+from typing import Any, Dict, Tuple
 
+from gui_v2.config import cfg
 from models.auth_model import AuthRespModel
-from config import SecurityConfig
 
 
 class RateLimiter:
     def __init__(self):
-        self.failed_attempts: Dict[str, Dict[str, Any]] = (
-            {}
-        )  # Failed attempts. Key = username, Arg = count / first_attempt / last_attempt
+        self.failed_attempts: Dict[
+            str, Dict[str, Any]
+        ] = {}  # Failed attempts. Key = username, Arg = count / first_attempt / last_attempt
         self.lock = threading.RLock()  # Reentrant lock
         self.last_cleanup = time.time()  # Last cleanup time
 
     # Old entries cleanup
     def _cleanup_old_entries(self):
         current_time = time.time()
-        if current_time - self.last_cleanup >= SecurityConfig.CLEANUP_INTERVAL:
+        if current_time - self.last_cleanup >= cfg.data.CLEANUP_INTERVAL:
             with self.lock:
                 # Work with failed attempts count
                 self.failed_attempts = {
                     username: data
                     for username, data in self.failed_attempts.items()
-                    if current_time - data["first_attempt"] < SecurityConfig
+                    if current_time - data["first_attempt"] < cfg.data.CLEANUP_INTERVAL
                 }
                 self.last_cleanup = current_time
 
     # Check limits
-    def check_rate_limit(self, username: str) -> tuple[bool, AuthRespModel]:
+    def check_rate_limit(self, username: str) -> Tuple[bool, AuthRespModel]:
         self._cleanup_old_entries()
         current_time = time.time()
 
@@ -36,16 +36,11 @@ class RateLimiter:
             if username in self.failed_attempts:
                 attempts_data = self.failed_attempts[username]
 
-                if (
-                    current_time - attempts_data["last_attempt"]
-                    < SecurityConfig.LOCKOUT_DURATION
-                ):
-                    # Full lockout
-                    if attempts_data["count"] >= SecurityConfig.MAX_LOGIN_ATTEMPTS:
-                        remaining_time = int(
-                            SecurityConfig.LOCKOUT_DURATION
-                            - (current_time - attempts_data["last_attempt"])
-                        )
+                time_passed = current_time - attempts_data["last_attempt"]
+
+                if time_passed < cfg.data.LOCKOUT_DURATION:
+                    if attempts_data["count"] >= cfg.data.MAX_LOGIN_ATTEMPTS:
+                        remaining_time = int(cfg.data.LOCKOUT_DURATION - time_passed)
                         return False, AuthRespModel(
                             success=False,
                             message=f"Too many failed attempts. Try again in {remaining_time} seconds.",
@@ -56,7 +51,7 @@ class RateLimiter:
                     # Limited access
                     else:
                         remaining_attempts = (
-                            SecurityConfig.MAX_LOGIN_ATTEMPTS - attempts_data["count"]
+                            cfg.data.MAX_LOGIN_ATTEMPTS - attempts_data["count"]
                         )
                         return True, AuthRespModel(
                             success=True,
@@ -69,7 +64,7 @@ class RateLimiter:
         return True, AuthRespModel(
             success=True,
             message="Proceed",
-            remaining_attempts=SecurityConfig.MAX_LOGIN_ATTEMPTS,
+            remaining_attempts=cfg.data.MAX_LOGIN_ATTEMPTS,
             lockout_time=None,
         )
 
@@ -89,10 +84,10 @@ class RateLimiter:
             data["count"] += 1
             data["last_attempt"] = current_time
 
-            remaining_attempts = SecurityConfig.MAX_LOGIN_ATTEMPTS - data["count"]
+            remaining_attempts = cfg.data.MAX_LOGIN_ATTEMPTS - data["count"]
 
-            if data["count"] >= SecurityConfig.MAX_LOGIN_ATTEMPTS:
-                lockout_time = SecurityConfig.LOCKOUT_DURATION
+            if data["count"] >= cfg.data.MAX_LOGIN_ATTEMPTS:
+                lockout_time = cfg.data.LOCKOUT_DURATION
                 return AuthRespModel(
                     success=False,
                     message=f"Sorry, your account locked due to too many failed attempts. Try again in {lockout_time} second.",

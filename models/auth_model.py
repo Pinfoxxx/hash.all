@@ -3,6 +3,8 @@ from typing import ClassVar, Optional
 
 from pydantic import Field, field_validator, model_validator
 
+from gui_v2.config import cfg
+
 from .string_model import BaseSecureModel, SecureString
 
 
@@ -14,15 +16,11 @@ class UserRegModel(BaseSecureModel):
         max_length=50,
         pattern=r"^[a-zA-Z0-9_-]+$",
         examples=["john_doe123"],
-        description="Username for registration",
     )
 
     password: str = Field(
         ...,  # => required True
-        min_length=12,
-        max_length=128,
         examples=["UltraSecurePass123!"],
-        description="Strong password meeting complexity requirements",
     )
 
     # Validation patterns
@@ -46,16 +44,23 @@ class UserRegModel(BaseSecureModel):
     @classmethod
     # V is for validate
     def validate_pwd_complex(cls, v: str) -> str:
+        if len(v) < cfg.data.MIN_PASSWORD_LENGTH:
+            raise ValueError(
+                f"Password must be at least {cfg.data.MIN_PASSWORD_LENGTH} characters long"
+            )
+
+        if len(v) > cfg.data.MAX_PASSWORD_LENGTH:
+            raise ValueError(
+                f"Password must be shorter than {cfg.data.MAX_PASSWORD_LENGTH} characters"
+            )
+
         if not re.match(cls.PASSWORD_COMPLEXITY, v):
             raise ValueError(
-                "Password must contain at least:\n1 uppercase letter, 1 lowercase letter, 1 number and 1 special character"
+                "Password must contain: 1 upper, 1 lower, 1 digit, 1 special char"
             )
 
         if v.lower() == v:
             raise ValueError("Password must contain mixed case characters")
-
-        if len(set(v)) < 8:
-            raise ValueError("Password must contain at least 8 unique characters")
 
         return SecureString.validate_secure_str(v, "Password")
 
@@ -73,11 +78,8 @@ class UserRegModel(BaseSecureModel):
 
 # Login Pydantic model
 class UserLoginModel(BaseSecureModel):
-    username: str = Field(..., min_length=3, max_length=50, examples=["john_doe123"])
-
-    password: str = Field(
-        ..., min_length=12, max_length=128, examples=["UltraSecurePass123!"]
-    )
+    username: str = Field(..., min_length=3, max_length=50)
+    password: str = Field(..., min_length=1)
 
     @field_validator("password")
     @classmethod
@@ -87,10 +89,10 @@ class UserLoginModel(BaseSecureModel):
 
 # Authentication response Pydantic model
 class AuthRespModel(BaseSecureModel):
-    success: bool = Field(..., examples=[True, False])
-    message: str = Field(..., examples=["Login successful", "Invalid credentials"])
-    remaining_attempts: Optional[int] = Field(None, ge=0, le=5, examples=[3])
-    lockout_time: Optional[int] = Field(None, ge=0, examples=[300])
+    success: bool
+    message: str
+    remaining_attempts: Optional[int] = None
+    lockout_time: Optional[int] = None
 
     # Checking logical sequence
     @model_validator(mode="after")

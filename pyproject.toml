@@ -1,22 +1,32 @@
 [project]
 name = "hash-all"
-version = "0.5"
-description = ""
-authors = [
-    {name = "Pinfoxxx",email = "zhirileev.k@gmail.com"}
-]
-license = {text = "MIT"}
+version = "1.0.0"
+description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
-    "black (>=25.9.0,<26.0.0)",
-    "pydantic (>=2.12.3,<3.0.0)",
-    "bcrypt (>=5.0.0,<6.0.0)"
+    "annotated-types==0.7.0",
+    "bcrypt==5.0.0",
+    "certifi==2026.1.4",
+    "cffi==2.0.0",
+    "charset-normalizer==3.4.4",
+    "click==8.3.1",
+    "cryptography==46.0.4",
+    "idna==3.11",
+    "mypy-extensions==1.1.0",
+    "packaging==25.0",
+    "pathspec==1.0.3",
+    "platformdirs==4.5.1",
+    "pycparser==3.0",
+    "pydantic==2.12.5",
+    "pydantic-core==2.41.5",
+    "pyside6==6.10.1",
+    "pyside6-addons==6.10.1",
+    "pyside6-essentials==6.10.1",
+    "pytokens==0.3.0",
+    "requests==2.32.5",
+    "shiboken6==6.10.1",
+    "typing-extensions==4.15.0",
+    "typing-inspection==0.4.2",
+    "urllib3==2.6.3",
 ]
-
-[tool.poetry]
-packages = [{include = "hash"}]
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
