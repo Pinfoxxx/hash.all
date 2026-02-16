@@ -77,5 +77,20 @@
     "validation_error": "Ошибка валидации",
     "system_error": "Системная ошибка",
     "error_title": "Ошибка",
-    "warning_title": "Внимание"
+    "warning_title": "Внимание",
+    "login_title": "Вход",
+    "register_title": "Регистрация",
+    "login_header": "hash.all",
+    "login_username_label": "Имя пользователя",
+    "login_password_label": "Пароль",
+    "login_username_placeholder": "Введите имя пользователя",
+    "login_password_placeholder": "Введите пароль",
+    "login_btn": "Войти",
+    "register_btn": "Регистрация",
+    "login_error_empty": "Пожалуйста, введите имя и пароль",
+    "login_failed_title": "Ошибка входа",
+    "register_error_empty": "Введите имя и пароль для регистрации",
+    "register_success_title": "Успешно",
+    "register_failed_title": "Ошибка регистрации",
+    "invalid_data_title": "Неверные данные"
 }

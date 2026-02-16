@@ -77,5 +77,20 @@
     "validation_error": "Validation error",
     "system_error": "System error",
     "error_title": "Error",
-    "warning_title": "Warning"
+    "warning_title": "Warning",
+    "login_title": "Login",
+    "register_title": "Register",
+    "login_header": "hash.all",
+    "login_username_label": "Username",
+    "login_password_label": "Password",
+    "login_username_placeholder": "Enter username",
+    "login_password_placeholder": "Enter password",
+    "login_btn": "Login",
+    "register_btn": "Register",
+    "login_error_empty": "Please enter username and password",
+    "login_failed_title": "Login Failed",
+    "register_error_empty": "Please enter username and password to register",
+    "register_success_title": "Success",
+    "register_failed_title": "Registration Failed",
+    "invalid_data_title": "Invalid Data"
 } 
