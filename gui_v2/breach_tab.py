@@ -108,7 +108,7 @@ class CheckTab(QWidget):
             return
 
         # Indication
-        self.status_label.setText("status_checking")
+        self.status_label.setText(translate.get_translation("status_checking"))
         self.status_label.setStyleSheet("color: #4da3df;")
         self.check.setEnabled(False)
 
@@ -122,7 +122,9 @@ class CheckTab(QWidget):
             if self.cb_bypass.isChecked():
                 api_name = "Russian DB"
                 if not self.ru_db.is_ready:
-                    self.status_label.setText("status_init_db")
+                    self.status_label.setText(
+                        translate.get_translation("status_init_db")
+                    )
                     QApplication.processEvents()
                     self.ru_db.initialize()
                 if self.ru_db.is_ready:
