@@ -92,5 +92,7 @@
     "register_error_empty": "Введите имя и пароль для регистрации",
     "register_success_title": "Успешно",
     "register_failed_title": "Ошибка регистрации",
-    "invalid_data_title": "Неверные данные"
+    "invalid_data_title": "Неверные данные",
+    "login_error_unexpected": "Произошла непредвиденная ошибка: {error}",
+    "register_error_generic": "Ошибка регистрации: {error}"
 }

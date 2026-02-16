@@ -92,5 +92,7 @@
     "register_error_empty": "Please enter username and password to register",
     "register_success_title": "Success",
     "register_failed_title": "Registration Failed",
-    "invalid_data_title": "Invalid Data"
+    "invalid_data_title": "Invalid Data",
+    "login_error_unexpected": "An unexpected error occurred: {error}",
+    "register_error_generic": "Registration error: {error}"
 } 
