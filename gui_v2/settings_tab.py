@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QComboBox,
     QDoubleSpinBox,
@@ -20,6 +20,10 @@ from gui_v2.translator import translate
 
 
 class SettingsTab(QWidget):
+    """Settings tab widget"""
+
+    languageChanged = Signal()
+
     def __init__(self):
         super().__init__()
 
@@ -203,6 +207,11 @@ class SettingsTab(QWidget):
         if old_lang != new_lang:
             translate.load_language()
             self.retranslate_ui()
+            self.languageChanged.emit()
+
+        if old_lang != new_lang:
+            translate.load_language()
+            self.retranslate_ui()
 
             QMessageBox.information(
                 self,
@@ -230,6 +239,7 @@ class SettingsTab(QWidget):
             self._load_values()
             translate.load_language()
             self.retranslate_ui()
+            self.languageChanged.emit()
 
         QMessageBox.information(
             self,
