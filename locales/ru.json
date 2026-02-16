@@ -33,5 +33,10 @@
     "status_conn_error": "⚠️ Ошибка соединения с {api}",
     "status_found": "❌ Найден в {count} утечках ({api})!",
     "status_secure": "✅ Надежен (Проверено через {api})",
-    "status_error": "⚠️ Ошибка: {error}"
+    "status_error": "⚠️ Ошибка: {error}",
+    "window_title": "hash.all - менеджер паролей",
+    "tab_vault": "Хранилище",
+    "tab_generator": "Генератор",
+    "tab_breach": "Проверка утечек",
+    "tab_settings": "Настройки"
 }

@@ -23,7 +23,7 @@
     "check_header": "Check password security:",
     "enter_pass_placeholder": "Enter password to check...",
     "show_pass": "Show password",
-    "use_ru_db": "Use Russian database (offline/bypass)",
+    "use_ru_db": "Use Russian database",
     "check_btn": "Check password",
     "warning_title": "Warning",
     "empty_pass_msg": "Please enter a password to check.",
@@ -33,5 +33,10 @@
     "status_conn_error": "⚠️ Connection error with {api}",
     "status_found": "❌ Found in {count} breaches ({api})!",
     "status_secure": "✅ Secure (Verified via {api})",
-    "status_error": "⚠️ Error: {error}"
+    "status_error": "⚠️ Error: {error}",
+    "window_title": "hash.all - password manager",
+    "tab_vault": "Vault",
+    "tab_generator": "Generator",
+    "tab_breach": "Check breaches",
+    "tab_settings": "Settings"
 } 
