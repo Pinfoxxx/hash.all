@@ -30,7 +30,7 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self.login_screen)
 
         # Set window size for login_window
-        self.setFixedSize(400, 350)
+        self.setFixedSize(450, 400)
         self.center_window()
 
         # Protection from garbage collector (objects links)
