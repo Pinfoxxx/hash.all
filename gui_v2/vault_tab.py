@@ -1,30 +1,30 @@
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from keys.vault import VaultManager
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
+    QCheckBox,
+    QFrame,
     QGridLayout,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
-    QPushButton,
     QListWidget,
-    QCheckBox,
-    QTextEdit,
-    QFrame,
-    QMessageBox,
     QListWidgetItem,
+    QMessageBox,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
 
 from models.vault_model import VaultEntryModel
 
 
 class VaultTab(QWidget):
-    "Vault tab"
+    "Vault tab widget"
 
     def __init__(self):
         super().__init__()

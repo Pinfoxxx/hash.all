@@ -16,6 +16,8 @@ from web_requests.russian_api.hash_search import HashDBSearch
 
 
 class CheckTab(QWidget):
+    """Check tab widget"""
+
     def __init__(self):
         super().__init__()
 

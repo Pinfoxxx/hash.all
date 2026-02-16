@@ -1,21 +1,21 @@
+from pydantic import ValidationError
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
     QLabel,
     QLineEdit,
-    QPushButton,
     QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
 )
-from pydantic import ValidationError
 
 from auth.auth import AuthManager
-from models.auth_model import UserRegModel, UserLoginModel
+from models.auth_model import UserLoginModel, UserRegModel
 
 
 # Login window
 class LoginWindow(QWidget):
-    "Login Window"
+    "Login window widget"
 
     success = Signal()
 

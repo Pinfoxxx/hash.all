@@ -20,6 +20,8 @@ from web_requests.russian_api.hash_search import HashDBSearch
 
 
 class GeneratorTab(QWidget):
+    """Generator tab widget"""
+
     # Signal for password vault
     password_used_in_vault = Signal(str)
 
@@ -29,6 +31,7 @@ class GeneratorTab(QWidget):
         # Initializing APIs
         self.hibp_api = HIBPClient()
         self.ru_db = HashDBSearch()
+
         # Initializing gui
         self.init_ui()
 
