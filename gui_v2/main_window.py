@@ -77,6 +77,9 @@ class MainWindow(QMainWindow):
             if hasattr(self, "settings_tab"):
                 self.settings_tab.refresh_values()
 
+            # Forced translation when changing languages
+            self.on_language_changed()
+
         except Exception as e:
             traceback.print_exc()
             QMessageBox.critical(
@@ -115,11 +118,11 @@ class MainWindow(QMainWindow):
         if hasattr(self.settings_tab, "languageChanged"):
             self.settings_tab.languageChanged.connect(self.on_language_changed)
 
-        # Add tabs
-        self.tabs.addTab(self.vault_tab, "Password vault")
-        self.tabs.addTab(self.generator_tab, "Password generator")
-        self.tabs.addTab(self.breach_tab, "Check breaches")
-        self.tabs.addTab(self.settings_tab, "Settings")
+        # Add tabs (with forced translate)
+        self.tabs.addTab(self.vault_tab, translate.get_translation("tab_vault"))
+        self.tabs.addTab(self.generator_tab, translate.get_translation("tab_generator"))
+        self.tabs.addTab(self.breach_tab, translate.get_translation("tab_breach"))
+        self.tabs.addTab(self.settings_tab, translate.get_translation("tab_settings"))
 
         # Add in stack
         self.stack.addWidget(self.tabs)
@@ -138,8 +141,8 @@ class MainWindow(QMainWindow):
         # if hasattr(self.vault_tab, "retranslate_ui"):
         #     self.vault_tab.retranslate_ui()
         #
-        # if hasattr(self.generator_tab, "retranslate_ui"):
-        #     self.generator_tab.retranslate_ui()
+        if hasattr(self.generator_tab, "retranslate_ui"):
+            self.generator_tab.retranslate_ui()
 
         if hasattr(self.breach_tab, "retranslate_ui"):
             self.breach_tab.retranslate_ui()
