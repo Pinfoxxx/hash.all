@@ -209,10 +209,6 @@ class SettingsTab(QWidget):
             self.retranslate_ui()
             self.languageChanged.emit()
 
-        if old_lang != new_lang:
-            translate.load_language()
-            self.retranslate_ui()
-
             QMessageBox.information(
                 self,
                 translate.get_translation("success_title"),
