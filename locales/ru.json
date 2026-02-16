@@ -38,5 +38,18 @@
     "tab_vault": "Хранилище",
     "tab_generator": "Генератор",
     "tab_breach": "Проверка утечек",
-    "tab_settings": "Настройки"
+    "tab_settings": "Настройки",
+    "gen_length": "Длина пароля:",
+    "gen_upper": "Заглавные буквы (A-Z)",
+    "gen_lower": "Строчные буквы (a-z)",
+    "gen_digits": "Цифры (0-9)",
+    "gen_special": "Спецсимволы (!@#$%)",
+    "gen_result_label": "Сгенерированный пароль:",
+    "gen_placeholder": "Здесь появится пароль...",
+    "gen_bypass": "Использовать базу РФ (bypass)",
+    "gen_btn_generate": "Сгенерировать пароль",
+    "gen_btn_copy": "Скопировать",
+    "gen_btn_use": "Использовать в хранилище",
+    "gen_msg_copied": "Пароль успешно скопирован в буфер обмена!",
+    "gen_msg_gen_first": "Сначала сгенерируйте пароль."
 }

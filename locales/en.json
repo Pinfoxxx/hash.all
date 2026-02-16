@@ -38,5 +38,18 @@
     "tab_vault": "Vault",
     "tab_generator": "Generator",
     "tab_breach": "Check breaches",
-    "tab_settings": "Settings"
+    "tab_settings": "Settings",
+    "gen_length": "Password length:",
+    "gen_upper": "Uppercase letters (A-Z)",
+    "gen_lower": "Lowercase letters (a-z)",
+    "gen_digits": "Digits (0-9)",
+    "gen_special": "Special characters (!@#$%)",
+    "gen_result_label": "Generated password:",
+    "gen_placeholder": "There will be a password here...",
+    "gen_bypass": "Use Russian bypass",
+    "gen_btn_generate": "Generate password",
+    "gen_btn_copy": "Copy to clipboard",
+    "gen_btn_use": "Use in vault",
+    "gen_msg_copied": "Password successfully copied to clipboard!",
+    "gen_msg_gen_first": "Please generate a password first."
 } 
