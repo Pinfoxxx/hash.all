@@ -8,6 +8,7 @@ from gui_v2.config import cfg
 from gui_v2.generator_tab import GeneratorTab
 from gui_v2.login_window import LoginWindow
 from gui_v2.settings_tab import SettingsTab
+from gui_v2.translator import translate
 from gui_v2.vault_tab import VaultTab
 from keys.vault import VaultManager
 
@@ -37,13 +38,16 @@ class MainWindow(QMainWindow):
         self.vault_manager = None
 
     def on_login_success(self):
-        "Slot which initializing logic if success"
+        """Slot which initializing logic if success"""
         username = self.login_screen.name_input.text()
         password = self.login_screen.pass_input.text()
         try:
             # print("Login successful. Initializing managers...")  # Just for debugging
             cfg.load_user_config(username)
             print(f"Loaded configuration for user: {username}")
+
+            # Loading translates
+            translate.load_language()
 
             # Initializing CryptoManager
             self.crypto_manager = CryptoManager(password=password)
@@ -83,7 +87,7 @@ class MainWindow(QMainWindow):
             self.center_window()
 
     def setup_main(self):
-        "Creating tabs and injecting dependencies"
+        """Creating tabs and injecting dependencies"""
         # Update dependencies if the interface has already been created
         if hasattr(self, "tabs"):
             if self.vault_manager:
@@ -107,6 +111,10 @@ class MainWindow(QMainWindow):
             self.on_password_from_generator
         )
 
+        # Connecting language change signal
+        if hasattr(self.settings_tab, "languageChanged"):
+            self.settings_tab.languageChanged.connect(self.on_language_changed)
+
         # Add tabs
         self.tabs.addTab(self.vault_tab, "Password vault")
         self.tabs.addTab(self.generator_tab, "Password generator")
@@ -116,15 +124,35 @@ class MainWindow(QMainWindow):
         # Add in stack
         self.stack.addWidget(self.tabs)
 
+    def on_language_changed(self):
+        """Slot called when changing the language in settings"""
+        # Update tab titles
+        self.tabs.setTabText(0, translate.get_translation("tab_vault"))
+        self.tabs.setTabText(1, translate.get_translation("tab_generator"))
+        self.tabs.setTabText(2, translate.get_translation("tab_breach"))
+        self.tabs.setTabText(3, translate.get_translation("tab_settings"))
+
+        # Update window title
+        self.setWindowTitle(translate.get_translation("window_title"))
+
+        # if hasattr(self.vault_tab, "retranslate_ui"):
+        #     self.vault_tab.retranslate_ui()
+        #
+        # if hasattr(self.generator_tab, "retranslate_ui"):
+        #     self.generator_tab.retranslate_ui()
+
+        if hasattr(self.breach_tab, "retranslate_ui"):
+            self.breach_tab.retranslate_ui()
+
     def center_window(self):
-        "Center window"
+        """Center window"""
         frame_geometry = self.frameGeometry()
         screen_center = self.screen().availableGeometry().center()
         frame_geometry.moveCenter(screen_center)
         self.move(frame_geometry.topLeft())
 
     def on_password_from_generator(self, password):
-        "Switch to vault tab and paste password"
+        """Switch to vault tab and paste password"""
         self.tabs.setCurrentIndex(0)
         self.vault_tab.pass_input.setText(password)
         self.vault_tab.pass_input.setFocus()
