@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from gui_v2.translator import translate
 from models.vault_model import VaultEntryModel
 
 
@@ -36,7 +37,7 @@ class VaultTab(QWidget):
 
         # Services list (Left side)
         left = QVBoxLayout()
-        self.stored_services_label = QLabel("Stored services:")
+        self.stored_services_label = QLabel()
         self.services_list = QListWidget()
 
         left.addWidget(self.stored_services_label)
@@ -53,35 +54,42 @@ class VaultTab(QWidget):
         self.pass_input = QLineEdit()
         self.pass_input.setEchoMode(QLineEdit.EchoMode.Password)
 
-        self.show_pass = QCheckBox("Show password")
-
+        self.show_pass = QCheckBox()
         self.show_pass.stateChanged.connect(self.toggle_password_visibility)
 
         self.notes_input = QTextEdit()
-        self.notes_input.setPlaceholderText("Some notes...")
 
         # Field's grid
         grid = QGridLayout()
-        grid.addWidget(QLabel("Service:"), 0, 0)
+
+        # Labels
+        self.label_service = QLabel()
+        self.label_username = QLabel()
+        self.label_password = QLabel()
+        self.label_notes = QLabel()
+
+        # Add widgets to grid
+        grid.addWidget(self.label_service, 0, 0)
         grid.addWidget(self.service_input, 0, 1)
-        grid.addWidget(QLabel("Username:"), 1, 0)
+        grid.addWidget(self.label_username, 1, 0)
         grid.addWidget(self.name_input, 1, 1)
-        grid.addWidget(QLabel("Password:"), 2, 0)
+        grid.addWidget(self.label_password, 2, 0)
         grid.addWidget(self.pass_input, 2, 1)
         grid.addWidget(QLabel(""), 3, 0)
         grid.addWidget(self.show_pass, 3, 1)
-        grid.addWidget(QLabel("Notes:"), 4, 0)
+        grid.addWidget(self.label_notes, 4, 0)
         grid.addWidget(self.notes_input, 4, 1)
 
         right_layout.addLayout(grid)
 
         # Buttons
         buttons = QHBoxLayout()
-        self.save_button = QPushButton("Save entry")
-        self.clear_button = QPushButton("Clear entry")
-        self.delete_button = QPushButton("Delete entry")
-        self.refresh_button = QPushButton("Refresh")
+        self.save_button = QPushButton()
+        self.clear_button = QPushButton()
+        self.delete_button = QPushButton()
+        self.refresh_button = QPushButton()
 
+        # Add widgets in layout
         buttons.addWidget(self.save_button)
         buttons.addWidget(self.clear_button)
         buttons.addWidget(self.delete_button)
@@ -103,8 +111,36 @@ class VaultTab(QWidget):
         self.delete_button.clicked.connect(self.delete_entry)
         self.refresh_button.clicked.connect(self.refresh_list)
 
+        # Apply translate at start
+        self.retranslate_ui()
+
+    def retranslate_ui(self):
+        """Update all texts on tab"""
+        # Labels
+        self.stored_services_label.setText(
+            translate.get_translation("vault_stored_services")
+        )
+        self.label_service.setText(translate.get_translation("vault_service"))
+        self.label_username.setText(translate.get_translation("vault_username"))
+        self.label_password.setText(translate.get_translation("vault_password"))
+        self.label_notes.setText(translate.get_translation("vault_notes"))
+
+        # Checkboxes
+        self.show_pass.setText(translate.get_translation("vault_show_pass"))
+
+        # Placeholder text
+        self.notes_input.setPlaceholderText(
+            translate.get_translation("vault_notes_placeholder")
+        )
+
+        # Buttons
+        self.save_button.setText(translate.get_translation("vault_btn_save"))
+        self.clear_button.setText(translate.get_translation("vault_btn_clear"))
+        self.delete_button.setText(translate.get_translation("vault_btn_delete"))
+        self.refresh_button.setText(translate.get_translation("vault_btn_refresh"))
+
     def set_vault_manager(self, manager: "VaultManager"):
-        "Dependency injection"
+        """Dependency injection"""
         self.vault_manager = manager
         self.refresh_list()
 
@@ -131,10 +167,14 @@ class VaultTab(QWidget):
             services = self.vault_manager.list_services()
             self.services_list.addItems(services)
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to refresh list: {e}")
+            QMessageBox.critical(
+                self,
+                translate.get_translation("error_title"),
+                translate.get_translation("vault_err_refresh").format(error=e),
+            )
 
     def load_entry(self, item: QListWidgetItem):
-        "Load service entry in form"
+        """Load service entry in form"""
         if not self.vault_manager:
             return
 
@@ -150,13 +190,19 @@ class VaultTab(QWidget):
             self.notes_input.setText(entry.notes)
         else:
             QMessageBox.warning(
-                self, "Warning", "Could not decrypt or find entry data."
+                self,
+                translate.get_translation("warning_title"),
+                translate.get_translation("vault_warn_decrypt"),
             )
 
     def save_entry(self):
-        "Collect data from UI, creating object and send it to the manager"
+        """Collect data from UI, creating object and send it to the manager"""
         if not self.vault_manager:
-            QMessageBox.critical(self, "Error", "Vault manager not initialized.")
+            QMessageBox.critical(
+                self,
+                translate.get_translation("error_title"),
+                translate.get_translation("vault_err_no_manager"),
+            )
             return
 
         service = self.service_input.text().strip()
@@ -167,7 +213,9 @@ class VaultTab(QWidget):
         # Basic validation on UI level
         if not service or not username or not password:
             QMessageBox.warning(
-                self, "Validation", "Service, username and password are required."
+                self,
+                translate.get_translation("validation_error"),
+                translate.get_translation("vault_warn_required"),
             )
             return
 
@@ -180,45 +228,68 @@ class VaultTab(QWidget):
             # Send model in logic layer
             if self.vault_manager.add_entry(entry_model):
                 QMessageBox.information(
-                    self, "Success", f"Entry for '{service}' saved."
+                    self,
+                    translate.get_translation("success_title"),
+                    translate.get_translation("vault_success_saved").format(
+                        service=service
+                    ),
                 )
                 self.refresh_list()
                 self.clear_form()
             else:
-                QMessageBox.warning(self, "Error", "Failed to save entry.")
+                QMessageBox.warning(
+                    self,
+                    translate.get_translation("error_title"),
+                    translate.get_translation("vault_err_save"),
+                )
 
         except ValueError as ve:
             # Validation errors
-            QMessageBox.warning(self, "Validation error", str(ve))
+            QMessageBox.warning(
+                self, translate.get_translation("validation_error"), str(ve)
+            )
 
         except Exception as e:
-            QMessageBox.critical(self, "System error", str(e))
+            # System errors
+            QMessageBox.critical(
+                self, translate.get_translation("system_error"), str(e)
+            )
 
     def delete_entry(self):
-        "Remove current selected service"
+        """Remove current selected service"""
         if not self.vault_manager:
             return
 
         service = self.service_input.text()
         if not service:
             QMessageBox.warning(
-                self, "Warning", "Please select or type a service name to delete."
+                self,
+                translate.get_translation("warning_title"),
+                translate.get_translation("vault_warn_select_del"),
             )
             return
 
         confirm = QMessageBox.question(
             self,
-            "Confirm delete",
-            f"Are you sure you want to delete '{service}'?",
+            translate.get_translation("vault_confirm_del_title"),
+            translate.get_translation("vault_confirm_del_msg").format(service=service),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
 
         if confirm == QMessageBox.StandardButton.Yes:
             if self.vault_manager.delete_entry(service):
-                QMessageBox.information(self, "Deleted", f"Entry '{service}' removed.")
+                QMessageBox.information(
+                    self,
+                    translate.get_translation("success_title"),
+                    translate.get_translation("vault_info_deleted").format(
+                        service=service
+                    ),
+                )
                 self.refresh_list()
                 self.clear_form()
             else:
                 QMessageBox.warning(
-                    self, "Error", "Service not found or could not be deleted."
+                    self,
+                    translate.get_translation("error_title"),
+                    translate.get_translation("vault_err_del_failed"),
                 )
