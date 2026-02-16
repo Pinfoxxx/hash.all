@@ -138,9 +138,9 @@ class MainWindow(QMainWindow):
         # Update window title
         self.setWindowTitle(translate.get_translation("window_title"))
 
-        # if hasattr(self.vault_tab, "retranslate_ui"):
-        #     self.vault_tab.retranslate_ui()
-        #
+        if hasattr(self.vault_tab, "retranslate_ui"):
+            self.vault_tab.retranslate_ui()
+
         if hasattr(self.generator_tab, "retranslate_ui"):
             self.generator_tab.retranslate_ui()
 
