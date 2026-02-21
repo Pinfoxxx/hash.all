@@ -101,5 +101,7 @@
     "login_warning_creds": "Invalid credentials! Remaining attempts: {remaining_attempts}",
     "login_warning_lockout_first": "Too many failed attempts. Try again in {lockout_time} seconds.",
     "login_warning_lockout_second": "Unfortunately, your account has been locked due to too many errors. Please try again in {lockout_time} seconds.",
-    "register_warning_username_exists": "This username is already taken"
+    "register_warning_username_exists": "This username is already taken",
+    "settings_defaults_yes": "Yes",
+    "settings_defaults_no": "No"
 } 

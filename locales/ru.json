@@ -101,5 +101,7 @@
     "login_warning_creds": "Неверные данные! Осталось попыток: {remaining_attempts}",
     "login_warning_lockout_first": "Слишком много неудачных попыток. Попробуйте через {lockout_time} секунд.",
     "login_warning_lockout_second": "К сожалению, ваш аккаунт заблокирован из-за большого количества ошибок. Попробуйте снова через {lockout_time} секунд",
-    "register_warning_username_exists": "Это имя пользователя уже занято"
+    "register_warning_username_exists": "Это имя пользователя уже занято",
+    "settings_defaults_yes": "Да",
+    "settings_defaults_no": "Нет"
 }

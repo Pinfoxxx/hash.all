@@ -79,6 +79,17 @@ class SettingsTab(QWidget):
         # Initial loading
         self._load_values()
 
+    def _show_msg_box(self, icon_type, title, text):
+        """Method for render messageboxes without icons on "OK" button"""
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(icon_type)
+        msg_box.setWindowTitle(title)
+        msg_box.setText(text)
+
+        msg_box.addButton("OK", QMessageBox.ButtonRole.AcceptRole)
+
+        msg_box.exec()
+
     def _setup_ui_elements(self):
         """Setting up ui groups"""
 
@@ -216,36 +227,45 @@ class SettingsTab(QWidget):
             self.retranslate_ui()
             self.languageChanged.emit()
 
-            QMessageBox.information(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Information,
                 translate.get_translation("success_title"),
                 translate.get_translation("language_changed_msg"),
             )
         else:
-            QMessageBox.information(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Information,
                 translate.get_translation("success_title"),
                 translate.get_translation("success_msg"),
             )
 
     def reset_settings(self):
         """Resetting the settings and loading them into the UI"""
-        reply = QMessageBox.question(
-            self,
-            translate.get_translation("confirm_reset_title"),
-            translate.get_translation("confirm_reset_msg"),
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Icon.Question)
+        msg_box.setWindowTitle(translate.get_translation("confirm_reset_title"))
+        msg_box.setText(translate.get_translation("confirm_reset_msg"))
+
+        btn_yes = msg_box.addButton(
+            translate.get_translation("settings_defaults_yes"),
+            QMessageBox.ButtonRole.YesRole,
+        )
+        msg_box.addButton(
+            translate.get_translation("settings_defaults_no"),
+            QMessageBox.ButtonRole.NoRole,
         )
 
-        if reply == QMessageBox.StandardButton.Yes:
+        msg_box.exec()
+
+        if msg_box.clickedButton() == btn_yes:
             cfg.reset()
             self._load_values()
             translate.load_language()
             self.retranslate_ui()
             self.languageChanged.emit()
 
-        QMessageBox.information(
-            self,
-            translate.get_translation("reset_success_title"),
-            translate.get_translation("reset_success_msg"),
-        )
+            self._show_msg_box(
+                QMessageBox.Icon.Information,
+                translate.get_translation("reset_success_title"),
+                translate.get_translation("reset_success_msg"),
+            )

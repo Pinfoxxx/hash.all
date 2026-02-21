@@ -114,6 +114,17 @@ class LoginWindow(QWidget):
         # Apply translates at start
         self.retranslate_ui()
 
+    def _show_msg_box(self, icon_type, title, text):
+        """Method for render messageboxes without icons on "OK" button"""
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(icon_type)
+        msg_box.setWindowTitle(title)
+        msg_box.setText(text)
+
+        msg_box.addButton("OK", QMessageBox.ButtonRole.AcceptRole)
+
+        msg_box.exec()
+
     def toggle_language(self):
         """Switches languages between RU and EN"""
         if cfg.data.LANGUAGE == "English":
@@ -161,7 +172,7 @@ class LoginWindow(QWidget):
         password = self.pass_input.text()
 
         if not username or not password:
-            QMessageBox.warning(
+            self._show_msg_box(
                 self,
                 translate.get_translation("error_title"),
                 translate.get_translation("login_error_empty"),
@@ -216,8 +227,8 @@ class LoginWindow(QWidget):
                         error_msg = f"{lockout_msg} {response.lockout_time}"
 
                 # Login error
-                QMessageBox.warning(
-                    self,
+                self._show_msg_box(
+                    QMessageBox.Icon.Warning,
                     translate.get_translation("login_failed_title"),
                     error_msg,
                 )
@@ -232,8 +243,8 @@ class LoginWindow(QWidget):
                 self, translate.get_translation("invalid_data_title"), error_msg
             )
         except Exception as e:
-            QMessageBox.critical(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Warning,
                 translate.get_translation("error_title"),
                 translate.get_translation("login_error_unexpected").format(
                     error=str(e)
@@ -245,8 +256,8 @@ class LoginWindow(QWidget):
         password = self.pass_input.text()
 
         if not username or not password:
-            QMessageBox.warning(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Warning,
                 translate.get_translation("error_title"),
                 translate.get_translation("register_error_empty"),
             )
@@ -257,8 +268,8 @@ class LoginWindow(QWidget):
             response = self.auth_manager.register_user(reg_data)
 
             if response.success:
-                QMessageBox.information(
-                    self,
+                self._show_msg_box(
+                    QMessageBox.Icon.Warning,
                     translate.get_translation("register_success_title"),
                     translate.get_translation("register_success_msg"),
                 )
@@ -269,8 +280,8 @@ class LoginWindow(QWidget):
                         "register_warning_username_exists"
                     )
 
-                QMessageBox.warning(
-                    self,
+                self._show_msg_box(
+                    QMessageBox.Icon.Warning,
                     translate.get_translation("register_failed_title"),
                     error_msg,
                 )
@@ -297,13 +308,15 @@ class LoginWindow(QWidget):
                 except KeyError:
                     error_msg = pwd_warning_raw
 
-            QMessageBox.warning(
-                self, translate.get_translation("invalid_data_title"), error_msg
+            self._show_msg_box(
+                QMessageBox.Icon.Warning,
+                translate.get_translation("invalid_data_title"),
+                error_msg,
             )
 
         except Exception as e:
-            QMessageBox.critical(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Warning,
                 translate.get_translation("error_title"),
                 translate.get_translation("register_error_generic").format(
                     error=str(e)
