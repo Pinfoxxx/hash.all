@@ -285,7 +285,9 @@ class LoginWindow(QWidget):
             loc = error.get("loc", ())
             error_field = str(loc[0]) if len(loc) > 0 else ""
 
-            if error_field == "password" or "username" in error_msg.lower():
+            if "pattern" in error_msg.lower():
+                error_msg = translate.get_translation("register_warning_pattern")
+            elif error_field == "password" or "username" in error_msg.lower():
                 pwd_warning_raw = translate.get_translation("register_warning_password")
 
                 try:
