@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from gui_v2.translator import translate
+from gui.translator import translate
 from web_requests.hibp_api import HIBPClient
 from web_requests.russian_api.hash_search import HashDBSearch
 

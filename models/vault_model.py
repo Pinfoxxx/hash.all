@@ -4,7 +4,7 @@ from typing import Dict, Optional
 
 from pydantic import Field, field_validator, model_validator
 
-from gui_v2.config import cfg
+from gui.config import cfg
 
 from .string_model import BaseSecureModel, SecureString
 

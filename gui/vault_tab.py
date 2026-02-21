@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from gui_v2.translator import translate
+from gui.translator import translate
 from models.vault_model import VaultEntryModel
 
 

@@ -2,8 +2,8 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 
-from gui_v2.styles import STYLES
-from gui_v2.main_window import MainWindow
+from gui.main_window import MainWindow
+from gui.styles import STYLES
 
 
 # Main runtime

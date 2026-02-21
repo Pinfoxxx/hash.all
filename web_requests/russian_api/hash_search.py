@@ -2,7 +2,7 @@ import hashlib
 import logging
 from typing import List, Optional
 
-from gui_v2.config import cfg
+from gui.config import cfg
 from models.yandex_model import FileMetadata
 
 from .yandex_api import YandexClient

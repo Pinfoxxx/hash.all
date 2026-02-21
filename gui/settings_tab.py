@@ -15,8 +15,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from gui_v2.config import cfg
-from gui_v2.translator import translate
+from gui.config import cfg
+from gui.translator import translate
 
 
 class SettingsTab(QWidget):

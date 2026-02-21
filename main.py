@@ -20,7 +20,7 @@ def main():
     setup_imports()
 
     try:
-        from gui_v2.app import Runtime
+        from gui.app import Runtime
 
         # Creating object and run
         app_instance = Runtime()

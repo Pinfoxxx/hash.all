@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from crypto.crypto import CryptoManager
-from gui_v2.config import cfg
+from gui.config import cfg
 from models.vault_model import (
     EncryptedVaultEntryModel,
     VaultDataModel,

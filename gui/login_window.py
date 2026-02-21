@@ -11,8 +11,8 @@ from PySide6.QtWidgets import (
 )
 
 from auth.auth import AuthManager
-from gui_v2.config import cfg
-from gui_v2.translator import translate
+from gui.config import cfg
+from gui.translator import translate
 from models.auth_model import UserLoginModel, UserRegModel
 
 

@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from gui_v2.config import cfg
+from gui.config import cfg
 
 
 class TranslationManager:

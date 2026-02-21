@@ -3,13 +3,13 @@ import traceback
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QStackedWidget, QTabWidget
 
 from crypto.crypto import CryptoManager
-from gui_v2.breach_tab import CheckTab
-from gui_v2.config import cfg
-from gui_v2.generator_tab import GeneratorTab
-from gui_v2.login_window import LoginWindow
-from gui_v2.settings_tab import SettingsTab
-from gui_v2.translator import translate
-from gui_v2.vault_tab import VaultTab
+from gui.breach_tab import CheckTab
+from gui.config import cfg
+from gui.generator_tab import GeneratorTab
+from gui.login_window import LoginWindow
+from gui.settings_tab import SettingsTab
+from gui.translator import translate
+from gui.vault_tab import VaultTab
 from keys.vault import VaultManager
 
 
