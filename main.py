@@ -1,6 +1,6 @@
 """
 hash.all - Secure password manager
-version 1.0b
+version 1.0.1b
 """
 
 import sys
@@ -20,7 +20,7 @@ def main():
     setup_imports()
 
     try:
-        from gui_v2.app import Runtime
+        from gui.app import Runtime
 
         # Creating object and run
         app_instance = Runtime()

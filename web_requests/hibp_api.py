@@ -3,7 +3,7 @@ import time
 
 import requests
 
-from gui_v2.config import cfg
+from gui.config import cfg
 
 
 class HIBPClient:

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from crypto.crypto import CryptoManager
-from gui_v2.config import cfg
+from gui.config import cfg
 from models.vault_model import (
     EncryptedVaultEntryModel,
     VaultDataModel,
@@ -19,7 +19,7 @@ from models.vault_model import (
 class VaultManager:
     # Initialization
     def __init__(self, username: str, crypto_manager: CryptoManager):
-        self.vault_path = Path(f"{username}{cfg.data.VAULT_EXTENSION}")
+        self.vault_path = cfg.vaults_dir / f"{username}{cfg.data.VAULT_EXTENSION}"
         self.crypto = crypto_manager
         self._ensure_vault_exists()
 

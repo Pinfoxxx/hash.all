@@ -6,7 +6,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-from gui_v2.config import cfg
+from gui.config import cfg
 
 
 class CryptoManager:
@@ -40,13 +40,13 @@ class CryptoManager:
 
     def encrypt_data(self, data: str) -> str:
         if not data:
-            raise ValueError("Data cannot be empty")
+            return ""
         encrypted = self.fernet.encrypt(data.encode())
         return base64.b64encode(encrypted).decode()
 
     def decrypt_data(self, encrypted_data: str) -> str:
         if not encrypted_data:
-            raise ValueError("Encrypted data cannot be empty")
+            return ""
         try:
             encrypted_bytes = base64.b64decode(encrypted_data.encode())
             decrypted = self.fernet.decrypt(encrypted_bytes)

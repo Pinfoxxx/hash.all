@@ -7,7 +7,7 @@ import time
 
 import bcrypt
 
-from gui_v2.config import cfg
+from gui.config import cfg
 from models.auth_model import AuthRespModel, UserLoginModel, UserRegModel
 
 from .limiter import RateLimiter
@@ -80,8 +80,11 @@ class AuthManager:
                 bcrypt.gensalt(rounds=cfg.data.BCRYPT_ROUNDS),
             )
 
+            vault_salt = secrets.token_hex(32)
+
             users[user_data.username] = {
                 "hash": hashed.decode("utf-8"),
+                "vault_salt": vault_salt,
                 "created_at": time.time(),
             }
 
@@ -120,9 +123,9 @@ class AuthManager:
 
         try:
             # Protection from timing attack (additional hash verification)
-
             target_hash = None
             user_found = False
+            users = {}
 
             if self.db_path.exists():
                 with open(self.db_path, "r") as f:
@@ -148,11 +151,16 @@ class AuthManager:
             # Final logic checking
             if user_found and is_valid:
                 self.rate_limiter.clear_attempts(login_data.username)
+
+                user_data = users.get(login_data.username, {})
+                vault_salt = user_data.get("vault_salt")
+
                 return AuthRespModel(
                     success=True,
                     message="Login successful",
                     remaining_attempts=None,
                     lockout_time=None,
+                    vault_salt=vault_salt,
                 )
             else:
                 return self.rate_limiter.rec_failed_attempt(login_data.username)

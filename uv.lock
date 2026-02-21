@@ -276,7 +276,7 @@ wheels = [
 
 [[package]]
 name = "hash-all"
-version = "1.0.0"
+version = "1.0.1b0"
 source = { virtual = "." }
 dependencies = [
     { name = "annotated-types" },

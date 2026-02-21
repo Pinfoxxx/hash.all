@@ -18,7 +18,7 @@ class Config:
     # Safe limits (defaults)
     PBKDF2_ITERATIONS: int = 100000
     BCRYPT_ROUNDS: int = 14
-    MIN_PASSWORD_LENGTH: int = 12
+    MIN_PASSWORD_LENGTH: int = 8
     MAX_PASSWORD_LENGTH: int = 128
     SALT_SIZE: int = 32
     PEPPER_PATH: str = ".pepper"
@@ -29,7 +29,7 @@ class Config:
 
     # Application settings
     APP_NAME: str = "hash.all (test branch)"
-    VERSION: str = "1.0b"
+    VERSION: str = "1.0.1b"
     DEFAULT_WINDOW_SIZE: str = "800x600"
     LANGUAGE: str = "English"
 
@@ -44,13 +44,19 @@ class ConfigManager:
 
     def __init__(self):
         self.config_dir = self._get_config_path()
+        self._ensure_dir_exists(self.config_dir)
         self.config_file = (
             self.config_dir / "config_default.json"
         )  # Load default config while user logging in
+
+        self.vaults_dir = self.config_dir / "vaults"
+        self._ensure_dir_exists(self.vaults_dir)
+
         self.data = Config()
         self.load()
 
     def _get_config_path(self) -> Path:
+        """Determines the base config path depending on the OS"""
         home = Path.home()
 
         if platform.system() == "Windows":  # Windows
@@ -58,12 +64,15 @@ class ConfigManager:
         else:  # Linux / MacOS and etc.
             path = home / ".config" / "hash.all"
 
+        return path
+
+    def _ensure_dir_exists(self, path: Path):
+        """Creates directory with rights if it doesn't exists"""
         # Make dir with admin rights / 700 rights (only for owner)
         if not path.exists():
             path.mkdir(parents=True, exist_ok=True)
             if platform.system() != "Windows":
                 os.chmod(path, stat.S_IRWXU)  # rights rwx------
-        return path
 
     def load_user_config(self, username: str):
         self.config_file = self.config_dir / f"config_{username}.json"

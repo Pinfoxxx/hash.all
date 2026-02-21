@@ -3,7 +3,7 @@ from typing import ClassVar, Optional
 
 from pydantic import Field, field_validator, model_validator
 
-from gui_v2.config import cfg
+from gui.config import cfg
 
 from .string_model import BaseSecureModel, SecureString
 
@@ -93,6 +93,7 @@ class AuthRespModel(BaseSecureModel):
     message: str
     remaining_attempts: Optional[int] = None
     lockout_time: Optional[int] = None
+    vault_salt: Optional[str] = None
 
     # Checking logical sequence
     @model_validator(mode="after")

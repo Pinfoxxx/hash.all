@@ -3,13 +3,13 @@ import traceback
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QStackedWidget, QTabWidget
 
 from crypto.crypto import CryptoManager
-from gui_v2.breach_tab import CheckTab
-from gui_v2.config import cfg
-from gui_v2.generator_tab import GeneratorTab
-from gui_v2.login_window import LoginWindow
-from gui_v2.settings_tab import SettingsTab
-from gui_v2.translator import translate
-from gui_v2.vault_tab import VaultTab
+from gui.breach_tab import CheckTab
+from gui.config import cfg
+from gui.generator_tab import GeneratorTab
+from gui.login_window import LoginWindow
+from gui.settings_tab import SettingsTab
+from gui.translator import translate
+from gui.vault_tab import VaultTab
 from keys.vault import VaultManager
 
 
@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
         self.crypto_manager = None
         self.vault_manager = None
 
-    def on_login_success(self):
+    def on_login_success(self, vault_salt_hex: str):
         """Slot which initializing logic if success"""
         username = self.login_screen.name_input.text()
         password = self.login_screen.pass_input.text()
@@ -49,8 +49,16 @@ class MainWindow(QMainWindow):
             # Loading translates
             translate.load_language()
 
+            # Type conversion
+            salt_bytes = None
+            if vault_salt_hex:
+                try:
+                    salt_bytes = bytes.fromhex(vault_salt_hex)
+                except ValueError:
+                    print("Error: Invalid salt format")
+
             # Initializing CryptoManager
-            self.crypto_manager = CryptoManager(password=password)
+            self.crypto_manager = CryptoManager(password=password, salt=salt_bytes)
 
             # Initializing VaultManager
             self.vault_manager = VaultManager(

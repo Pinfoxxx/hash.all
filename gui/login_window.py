@@ -11,8 +11,8 @@ from PySide6.QtWidgets import (
 )
 
 from auth.auth import AuthManager
-from gui_v2.config import cfg
-from gui_v2.translator import translate
+from gui.config import cfg
+from gui.translator import translate
 from models.auth_model import UserLoginModel, UserRegModel
 
 
@@ -20,7 +20,8 @@ from models.auth_model import UserLoginModel, UserRegModel
 class LoginWindow(QWidget):
     """Login window widget"""
 
-    success = Signal()
+    # Salt signal
+    success = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -172,14 +173,55 @@ class LoginWindow(QWidget):
             response = self.auth_manager.verify_user(login_data)
 
             if response.success:
-                self.success.emit()
+                self.success.emit(response.vault_salt or "")
             else:
+                error_msg = response.message
+
+                if "Invalid credentials" in error_msg and hasattr(
+                    response, "remaining_attempts"
+                ):
+                    creds_warning_raw = translate.get_translation("login_warning_creds")
+
+                    try:
+                        error_msg = creds_warning_raw.format(
+                            remaining_attempts=response.remaining_attempts
+                        )
+                    except KeyError:
+                        error_msg = f"{creds_warning_raw}{response.remaining_attempts}"
+                elif (
+                    "Too many failed attempts" in error_msg
+                    and getattr(response, "lockout_time", None) is not None
+                ):
+                    lockout_msg = translate.get_translation(
+                        "login_warning_lockout_first"
+                    )
+                    try:
+                        error_msg = lockout_msg.format(
+                            lockout_time=response.lockout_time
+                        )
+                    except KeyError:
+                        error_msg = f"{lockout_msg} {response.lockout_time}"
+                elif (
+                    "account locked" in error_msg
+                    and getattr(response, "lockout_time", None) is not None
+                ):
+                    lockout_msg = translate.get_translation(
+                        "login_warning_lockout_second"
+                    )
+                    try:
+                        error_msg = lockout_msg.format(
+                            lockout_time=response.lockout_time
+                        )
+                    except KeyError:
+                        error_msg = f"{lockout_msg} {response.lockout_time}"
+
                 # Login error
                 QMessageBox.warning(
                     self,
                     translate.get_translation("login_failed_title"),
-                    response.message,
+                    error_msg,
                 )
+
         except ValidationError as e:
             # Error handler, because pydantic v2 giving a detailed description of the error, which is unnecessary here
             error_msg = e.errors()[0]["msg"] if e.errors() else str(e)
@@ -218,20 +260,41 @@ class LoginWindow(QWidget):
                 QMessageBox.information(
                     self,
                     translate.get_translation("register_success_title"),
-                    response.message,
+                    translate.get_translation("register_success_msg"),
                 )
             else:
+                error_msg = response.message
+                if "exist" in error_msg.lower():
+                    error_msg = translate.get_translation(
+                        "register_warning_username_exists"
+                    )
+
                 QMessageBox.warning(
                     self,
                     translate.get_translation("register_failed_title"),
-                    response.message,
+                    error_msg,
                 )
         except ValidationError as e:
             # Error handler, because pydantic v2 giving a detailed description of the error, which is unnecessary here
-            error_msg = e.errors()[0]["msg"] if e.errors() else str(e)
+            error = e.errors()[0] if e.errors() else {}
+            error_msg = error.get("msg", str(e))
 
             if "Value error" in error_msg:
                 error_msg = error_msg.split("Value error,")[1].strip()
+
+            loc = error.get("loc", ())
+            error_field = str(loc[0]) if len(loc) > 0 else ""
+
+            if error_field == "password" or "username" in error_msg.lower():
+                pwd_warning_raw = translate.get_translation("register_warning_password")
+
+                try:
+                    error_msg = pwd_warning_raw.format(
+                        min_len=cfg.data.MIN_PASSWORD_LENGTH
+                    )
+                except KeyError:
+                    error_msg = pwd_warning_raw
+
             QMessageBox.warning(
                 self, translate.get_translation("invalid_data_title"), error_msg
             )

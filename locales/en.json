@@ -7,6 +7,7 @@
     "language": "Language:",
     "hibp_api_delay": "HIBP API request delay (sec):",
     "hibp_timeout": "HIBP timeout (sec):",
+    "security_warning": "⚠️ Warning: Do not change the recommended security settings unless you know what you are doing.",
     "pbkdf2_iterations": "PBKDF2 iterations:",
     "bcrypt_rounds": "Bcrypt rounds:",
     "salt_size": "Salt size (bytes):",
@@ -94,5 +95,11 @@
     "register_failed_title": "Registration Failed",
     "invalid_data_title": "Invalid Data",
     "login_error_unexpected": "An unexpected error occurred: {error}",
-    "register_error_generic": "Registration error: {error}"
+    "register_error_generic": "Registration error: {error}",
+    "register_warning_password": "Password requirements not met.\n\nIt must:\n- Be at least {min_len} characters long\n- Does not contain username\n- Contain at least 1 uppercase letter\n- Contain at least 1 lowercase letter\n- Contain at least 1 digit\n- Contain at least 1 special character (@$!%*?&)",
+    "register_success_msg": "Successful registration. Log in to the app.",
+    "login_warning_creds": "Invalid credentials! Remaining attempts: {remaining_attempts}",
+    "login_warning_lockout_first": "Too many failed attempts. Try again in {lockout_time} seconds.",
+    "login_warning_lockout_second": "Unfortunately, your account has been locked due to too many errors. Please try again in {lockout_time} seconds.",
+    "register_warning_username_exists": "This username is already taken"
 } 
