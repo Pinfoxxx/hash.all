@@ -18,7 +18,7 @@ class Config:
     # Safe limits (defaults)
     PBKDF2_ITERATIONS: int = 100000
     BCRYPT_ROUNDS: int = 14
-    MIN_PASSWORD_LENGTH: int = 12
+    MIN_PASSWORD_LENGTH: int = 8
     MAX_PASSWORD_LENGTH: int = 128
     SALT_SIZE: int = 32
     PEPPER_PATH: str = ".pepper"
