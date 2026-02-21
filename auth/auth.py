@@ -7,7 +7,7 @@ import time
 
 import bcrypt
 
-from gui_v2.config import cfg
+from gui.config import cfg
 from models.auth_model import AuthRespModel, UserLoginModel, UserRegModel
 
 from .limiter import RateLimiter
