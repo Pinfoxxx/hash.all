@@ -11,11 +11,12 @@ class Base(BaseModel):
 
 # String with additional secure check
 class SecureString(str):
-
     @classmethod
     def validate_secure_str(cls, value: str, field_name: str) -> str:
 
         if not value:
+            if field_name.lower() in ["notes", "data"]:
+                return value
             raise ValueError(f"{field_name} cannot be empty!")
 
         if len(value) > 1024:
@@ -39,7 +40,6 @@ class SecureString(str):
 
 
 class BaseSecureModel(Base):
-
     model_config = ConfigDict(
         validate_assignment=True,  # Check assignment
         extra="forbid",  # Prohibit additional fields
@@ -57,9 +57,8 @@ class BaseSecureModel(Base):
         if isinstance(data, dict):
             for field_name, value in data.items():
                 if isinstance(value, str) and field_name in cls.model_fields:
-
                     # 1. Explicitly skip "notes" to allow empty values
-                    if field_name == "notes":
+                    if field_name.lower() in ["notes", "data"]:
                         continue
 
                     field_info = cls.model_fields[field_name]

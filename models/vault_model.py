@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-from typing import Dict
+from typing import Dict, Optional
 
 from pydantic import Field, field_validator, model_validator
 
@@ -14,7 +14,9 @@ class VaultEntryModel(BaseSecureModel):
     service: str = Field(..., min_length=1, max_length=100)
     username: str = Field(..., min_length=1, max_length=100)
     password: str = Field(..., examples=["SuperSecretPass123!"])
-    notes: str = Field(default="", json_schema_extra={"skip_secure_validation": True})
+    notes: Optional[str] = Field(
+        default="", json_schema_extra={"skip_secure_validation": True}
+    )
     created_at: float = Field(default_factory=time.time)
 
     # Service validation
@@ -61,7 +63,7 @@ class EncryptedVaultEntryModel(BaseSecureModel):
     service: str = Field(...)  # Unencrypted
     username: str = Field(...)  # Encrypted
     password: str = Field(...)  # Encrypted
-    notes: str = Field(...)  # Encrypted
+    notes: Optional[str] = Field(default="")  # Encrypted
     created_at: float = Field(...)  # Unencrypted
 
 
