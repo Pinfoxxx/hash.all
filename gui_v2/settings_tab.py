@@ -125,6 +125,9 @@ class SettingsTab(QWidget):
         # Security settings
         self.security_config = QGroupBox()
         security_form = QFormLayout()
+        self.label_security_warning = QLabel()
+        self.label_security_warning.setWordWrap(True)
+        self.label_security_warning.setStyleSheet("color: #e74c3c; margin-bottom: 5px;")
         self.iter = QSpinBox()
         self.iter.setRange(1000, 9999999)
         self.rounds = QSpinBox()
@@ -144,6 +147,7 @@ class SettingsTab(QWidget):
         security_form.addRow(self.label_rounds, self.rounds)
         security_form.addRow(self.label_salt, self.salt_size)
         security_form.addRow(self.label_lockout, self.lockout)
+        security_form.addRow(self.label_security_warning)
         self.security_config.setLayout(security_form)
         self.widget_layout.addWidget(self.security_config)
 
@@ -164,6 +168,9 @@ class SettingsTab(QWidget):
         self.label_rounds.setText(translate.get_translation("bcrypt_rounds"))
         self.label_salt.setText(translate.get_translation("salt_size"))
         self.label_lockout.setText(translate.get_translation("lockout"))
+        self.label_security_warning.setText(
+            translate.get_translation("security_warning")
+        )
 
         # Buttons texts
         self.save_btn.setText(translate.get_translation("save_btn"))

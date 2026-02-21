@@ -7,6 +7,7 @@
     "language": "Язык:",
     "hibp_api_delay": "Задержка запроса HIBP (сек):",
     "hibp_timeout": "Тайм-аут HIBP (сек):",
+    "security_warning": "⚠️ Внимание: не меняйте рекомендованные настройки безопасности, если вы не знаете, что делаете.",
     "pbkdf2_iterations": "Итерации PBKDF2:",
     "bcrypt_rounds": "Раунды Bcrypt:",
     "salt_size": "Размер соли (байт):",
