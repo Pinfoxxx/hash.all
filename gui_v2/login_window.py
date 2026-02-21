@@ -233,6 +233,18 @@ class LoginWindow(QWidget):
 
             if "Value error" in error_msg:
                 error_msg = error_msg.split("Value error,")[1].strip()
+
+            error_field = e.errors()[0].get("loc", [""])[0] if e.errors() else ""
+            if error_field == "password" or "Password" in error_msg:
+                pwd_warning_raw = translate.get_translation("register_warning_password")
+
+                try:
+                    error_msg = pwd_warning_raw.format(
+                        min_len=cfg.data.MIN_PASSWORD_LENGTH
+                    )
+                except KeyError:
+                    error_msg = pwd_warning_raw
+
             QMessageBox.warning(
                 self, translate.get_translation("invalid_data_title"), error_msg
             )
