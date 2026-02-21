@@ -93,6 +93,7 @@ class AuthRespModel(BaseSecureModel):
     message: str
     remaining_attempts: Optional[int] = None
     lockout_time: Optional[int] = None
+    vault_salt: Optional[str] = None
 
     # Checking logical sequence
     @model_validator(mode="after")

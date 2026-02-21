@@ -20,7 +20,8 @@ from models.auth_model import UserLoginModel, UserRegModel
 class LoginWindow(QWidget):
     """Login window widget"""
 
-    success = Signal()
+    # Salt signal
+    success = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -172,7 +173,7 @@ class LoginWindow(QWidget):
             response = self.auth_manager.verify_user(login_data)
 
             if response.success:
-                self.success.emit()
+                self.success.emit(response.vault_salt or "")
             else:
                 # Login error
                 QMessageBox.warning(
