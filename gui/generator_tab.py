@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -20,6 +20,57 @@ from web_requests.hibp_api import HIBPClient
 from web_requests.russian_api.hash_search import HashDBSearch
 
 
+class PasswordCheckThread(QThread):
+    """Background thread for password checking without GUI freezing"""
+
+    finished_signal = Signal(int, str)  # Sends breaches count and API name
+    error_signal = Signal(str)  # Sends error text
+    init_db_signal = Signal()  # DB initialization signal
+
+    def __init__(self, password, use_bypass, hibp_api, ru_db):
+        super().__init__()
+        self.password = password
+        self.use_bypass = use_bypass
+        self.hibp_api = hibp_api
+        self.ru_db = ru_db
+        self.is_cancelled = False
+
+    def cancel(self):
+        """Cancel thread if "generate" pressed again"""
+        self.is_cancelled = True
+
+    def run(self):
+        try:
+            count = 0
+            api_name = ""
+
+            if self.use_bypass:
+                # Russian DB
+                api_name = "Russian DB"
+                if not self.ru_db.is_ready:
+                    self.init_db_signal.emit()
+                    self.ru_db.initialize()
+                if self.is_cancelled:
+                    return
+                if self.ru_db.is_ready:
+                    count = self.ru_db.check_password(self.password)
+                else:
+                    self.error_signal.emit("DB_ERROR")
+                    return
+            else:
+                # HIBP API
+                api_name = "HIBP API"
+                count = self.hibp_api.check_password_breach(self.password)
+
+            if self.is_cancelled:
+                return
+
+            self.finished_signal.emit(count, api_name)
+        except Exception as e:
+            if not self.is_cancelled:
+                self.error_signal.emit(str(e))
+
+
 class GeneratorTab(QWidget):
     """Generator tab widget"""
 
@@ -32,6 +83,9 @@ class GeneratorTab(QWidget):
         # Initializing APIs
         self.hibp_api = HIBPClient()
         self.ru_db = HashDBSearch()
+
+        # Link to the background thread
+        self.check_thread = None
 
         # Initializing gui
         self.init_ui()
@@ -173,56 +227,56 @@ class GeneratorTab(QWidget):
         self.status_label.setText(translate.get_translation("status_checking"))
         self.status_label.setStyleSheet("color: #4da3df;")
 
-        # Update UI
-        QApplication.processEvents()
+        # Cancel last check
+        if self.check_thread is not None and self.check_thread.isRunning():
+            self.check_thread.cancel()
 
-        # Checking through web requests
-        count = 0
-        api_name = ""
+        # Create backgroud thread
+        self.check_thread = PasswordCheckThread(
+            password=password,
+            use_bypass=self.bypass.isChecked(),
+            hibp_api=self.hibp_api,
+            ru_db=self.ru_db,
+        )
 
-        try:
-            if self.bypass.isChecked():
-                # Russian DB
-                api_name = "Russian DB"
-                if not self.ru_db.is_ready:
-                    self.status_label.setText(
-                        translate.get_translation("status_init_db")
-                    )
-                    QApplication.processEvents()
-                    self.ru_db.initialize()
-                if self.ru_db.is_ready:
-                    count = self.ru_db.check_password(password)
-                else:
-                    self.status_label.setText(
-                        translate.get_translation("status_db_error")
-                    )
-                    self.status_label.setStyleSheet("color: #ff4d4d")
-                    return
-            else:
-                # HIBP API
-                api_name = "HIBP API"
-                count = self.hibp_api.check_password_breach(password)
+        # Connect signals from thread to GUI methods
+        self.check_thread.init_db_signal.connect(self.on_check_init)
+        self.check_thread.finished_signal.connect(self.on_check_finished)
+        self.check_thread.error_signal.connect(self.on_check_error)
 
-            if count == -1:  # Error
-                msg = translate.get_translation("status_conn_error").format(
-                    api=api_name
-                )
-                self.status_label.setText(msg)
-                self.status_label.setStyleSheet("color: #ffa500")
-            elif count > 0:  # No error, but still not good
-                msg = translate.get_translation("status_found").format(
-                    count=count, api=api_name
-                )
-                self.status_label.setText(msg)
-                self.status_label.setStyleSheet("color:#ff4d4d;")
-            else:
-                msg = translate.get_translation("status_secure").format(api=api_name)
-                self.status_label.setText(msg)
-                self.status_label.setStyleSheet("color: #2ecc71;")
+        # Start background thread
+        self.check_thread.start()
 
-        except Exception as e:
-            msg = translate.get_translation("status_error").format(error=str(e))
+    def on_check_init(self):
+        """Update UI during DB init"""
+        self.status_label.setText(translate.get_translation("status_init_db"))
+
+    def on_check_finished(self, count, api_name):
+        """Handling a successful response from API"""
+        if count == -1:  # Error
+            msg = translate.get_translation("status_conn_error").format(api=api_name)
             self.status_label.setText(msg)
+            self.status_label.setStyleSheet("color: #ffa500")
+        elif count > 0:  # No error, but still not good
+            msg = translate.get_translation("status_found").format(
+                count=count, api=api_name
+            )
+            self.status_label.setText(msg)
+            self.status_label.setStyleSheet("color:#ff4d4d;")
+        else:
+            msg = translate.get_translation("status_secure").format(api=api_name)
+            self.status_label.setText(msg)
+            self.status_label.setStyleSheet("color: #2ecc71;")
+
+    def on_check_error(self, error_msg):
+        """Handling errors from thread"""
+        if error_msg == "DB_ERROR":
+            self.status_label.setText(translate.get_translation("status_db_error"))
+            self.status_label.setStyleSheet("color: #ff4d4d")
+        else:
+            msg = translate.get_translation("status_error").format(error=error_msg)
+            self.status_label.setText(msg)
+            self.status_label.setStyleSheet("color: #ff4d4d")
 
     def copy_to_clipboard(self):
         """Copy to clipboard"""
