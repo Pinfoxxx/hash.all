@@ -269,7 +269,7 @@ class LoginWindow(QWidget):
 
             if response.success:
                 self._show_msg_box(
-                    QMessageBox.Icon.Warning,
+                    QMessageBox.Icon.Information,
                     translate.get_translation("register_success_title"),
                     translate.get_translation("register_success_msg"),
                 )

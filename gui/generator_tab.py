@@ -205,6 +205,8 @@ class GeneratorTab(QWidget):
 
     def generation_handler(self):
         """Generate password"""
+        # Turn off button while work
+        self.generate.setEnabled(False)
 
         try:
             password = PasswordGen.generate(
@@ -215,6 +217,7 @@ class GeneratorTab(QWidget):
                 use_special=self.cb_special.isChecked(),
             )  # Giving all arguments
         except ValueError:
+            self.generate.setEnabled(True)
             self._show_msg_box(
                 QMessageBox.Icon.Warning,
                 translate.get_translation("warning_title"),
@@ -268,6 +271,8 @@ class GeneratorTab(QWidget):
             self.status_label.setText(msg)
             self.status_label.setStyleSheet("color: #2ecc71;")
 
+        self.generate.setEnabled(True)
+
     def on_check_error(self, error_msg):
         """Handling errors from thread"""
         if error_msg == "DB_ERROR":
@@ -277,6 +282,8 @@ class GeneratorTab(QWidget):
             msg = translate.get_translation("status_error").format(error=error_msg)
             self.status_label.setText(msg)
             self.status_label.setStyleSheet("color: #ff4d4d")
+
+        self.generate.setEnabled(True)
 
     def copy_to_clipboard(self):
         """Copy to clipboard"""
