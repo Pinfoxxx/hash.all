@@ -49,9 +49,9 @@ class VaultManager:
     # Atomic save: tempfile, only owner can get this data
     def _save_vault(self, vault_data: VaultDataModel):
         # Tempfile directory
-        target_dir = (
-            self.vault_path.parent if self.vault_path.parent.exists() else Path.cwd()
-        )
+        self.vault_path.parent.mkdir(parents=True, exist_ok=True)
+
+        target_dir = self.vault_path.parent
 
         tmp_path = None
         try:
