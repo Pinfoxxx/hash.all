@@ -173,7 +173,7 @@ class LoginWindow(QWidget):
 
         if not username or not password:
             self._show_msg_box(
-                self,
+                QMessageBox.Icon.Warning,
                 translate.get_translation("error_title"),
                 translate.get_translation("login_error_empty"),
             )

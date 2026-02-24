@@ -114,6 +114,17 @@ class VaultTab(QWidget):
         # Apply translate at start
         self.retranslate_ui()
 
+    def _show_msg_box(self, icon_type, title, text):
+        """Method for render messageboxes without icons on "OK" button"""
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(icon_type)
+        msg_box.setWindowTitle(title)
+        msg_box.setText(text)
+
+        msg_box.addButton("OK", QMessageBox.ButtonRole.AcceptRole)
+
+        msg_box.exec()
+
     def retranslate_ui(self):
         """Update all texts on tab"""
         # Labels
@@ -167,8 +178,8 @@ class VaultTab(QWidget):
             services = self.vault_manager.list_services()
             self.services_list.addItems(services)
         except Exception as e:
-            QMessageBox.critical(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Critical,
                 translate.get_translation("error_title"),
                 translate.get_translation("vault_err_refresh").format(error=e),
             )
@@ -189,8 +200,8 @@ class VaultTab(QWidget):
             self.pass_input.setText(entry.password)
             self.notes_input.setText(entry.notes)
         else:
-            QMessageBox.warning(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Warning,
                 translate.get_translation("warning_title"),
                 translate.get_translation("vault_warn_decrypt"),
             )
@@ -198,8 +209,8 @@ class VaultTab(QWidget):
     def save_entry(self):
         """Collect data from UI, creating object and send it to the manager"""
         if not self.vault_manager:
-            QMessageBox.critical(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Critical,
                 translate.get_translation("error_title"),
                 translate.get_translation("vault_err_no_manager"),
             )
@@ -212,8 +223,8 @@ class VaultTab(QWidget):
 
         # Basic validation on UI level
         if not service or not username or not password:
-            QMessageBox.warning(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Warning,
                 translate.get_translation("validation_error"),
                 translate.get_translation("vault_warn_required"),
             )
@@ -227,8 +238,8 @@ class VaultTab(QWidget):
 
             # Send model in logic layer
             if self.vault_manager.add_entry(entry_model):
-                QMessageBox.information(
-                    self,
+                self._show_msg_box(
+                    QMessageBox.Icon.Information,
                     translate.get_translation("success_title"),
                     translate.get_translation("vault_success_saved").format(
                         service=service
@@ -237,22 +248,26 @@ class VaultTab(QWidget):
                 self.refresh_list()
                 self.clear_form()
             else:
-                QMessageBox.warning(
-                    self,
+                self._show_msg_box(
+                    QMessageBox.Icon.Warning,
                     translate.get_translation("error_title"),
                     translate.get_translation("vault_err_save"),
                 )
 
         except ValueError as ve:
             # Validation errors
-            QMessageBox.warning(
-                self, translate.get_translation("validation_error"), str(ve)
+            self._show_msg_box(
+                QMessageBox.Icon.Warning,
+                translate.get_translation("validation_error"),
+                str(ve),
             )
 
         except Exception as e:
             # System errors
-            QMessageBox.critical(
-                self, translate.get_translation("system_error"), str(e)
+            self._show_msg_box(
+                QMessageBox.Icon.Critical,
+                translate.get_translation("system_error"),
+                str(e),
             )
 
     def delete_entry(self):
@@ -262,24 +277,35 @@ class VaultTab(QWidget):
 
         service = self.service_input.text()
         if not service:
-            QMessageBox.warning(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Warning,
                 translate.get_translation("warning_title"),
                 translate.get_translation("vault_warn_select_del"),
             )
             return
 
-        confirm = QMessageBox.question(
-            self,
-            translate.get_translation("vault_confirm_del_title"),
-            translate.get_translation("vault_confirm_del_msg").format(service=service),
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Icon.Question)
+        msg_box.setWindowTitle(translate.get_translation("vault_confirm_del_title"))
+        msg_box.setText(
+            translate.get_translation("vault_confirm_del_msg").format(service=service)
         )
 
-        if confirm == QMessageBox.StandardButton.Yes:
+        btn_yes = msg_box.addButton(
+            translate.get_translation("vault_del_yes"),
+            QMessageBox.ButtonRole.YesRole,
+        )
+        msg_box.addButton(
+            translate.get_translation("vault_del_no"),
+            QMessageBox.ButtonRole.NoRole,
+        )
+
+        msg_box.exec()
+
+        if msg_box.clickedButton() == btn_yes:
             if self.vault_manager.delete_entry(service):
-                QMessageBox.information(
-                    self,
+                self._show_msg_box(
+                    QMessageBox.Icon.Information,
                     translate.get_translation("success_title"),
                     translate.get_translation("vault_info_deleted").format(
                         service=service
@@ -288,8 +314,8 @@ class VaultTab(QWidget):
                 self.refresh_list()
                 self.clear_form()
             else:
-                QMessageBox.warning(
-                    self,
+                self._show_msg_box(
+                    QMessageBox.Icon.Warning,
                     translate.get_translation("error_title"),
                     translate.get_translation("vault_err_del_failed"),
                 )

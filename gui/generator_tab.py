@@ -39,6 +39,17 @@ class GeneratorTab(QWidget):
         # Apply translates at start
         self.retranslate_ui()
 
+    def _show_msg_box(self, icon_type, title, text):
+        """Method for render messageboxes without icons on "OK" button"""
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(icon_type)
+        msg_box.setWindowTitle(title)
+        msg_box.setText(text)
+
+        msg_box.addButton("OK", QMessageBox.ButtonRole.AcceptRole)
+
+        msg_box.exec()
+
     def init_ui(self):
         # Default layout
         layout = QVBoxLayout()
@@ -149,8 +160,12 @@ class GeneratorTab(QWidget):
                 use_digits=self.cb_digits.isChecked(),
                 use_special=self.cb_special.isChecked(),
             )  # Giving all arguments
-        except ValueError as e:
-            self.status_label.setText(f"Error: {e}")
+        except ValueError:
+            self._show_msg_box(
+                QMessageBox.Icon.Warning,
+                translate.get_translation("warning_title"),
+                translate.get_translation("gen_error_nothing_selected"),
+            )
             return
 
         self.input.setText(password)
@@ -213,8 +228,8 @@ class GeneratorTab(QWidget):
         """Copy to clipboard"""
         if self.input.text():
             QApplication.clipboard().setText(self.input.text())
-            QMessageBox.information(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Information,
                 translate.get_translation("success_title"),
                 translate.get_translation("gen_msg_copied"),
             )
@@ -224,8 +239,8 @@ class GeneratorTab(QWidget):
         if self.input.text():
             self.password_used_in_vault.emit(self.input.text())
         else:
-            QMessageBox.warning(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Warning,
                 translate.get_translation("warning_title"),
                 translate.get_translation("gen_msg_gen_first"),
             )

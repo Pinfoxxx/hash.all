@@ -85,6 +85,17 @@ class CheckTab(QWidget):
         layout.addWidget(self.check)
         layout.addStretch()
 
+    def _show_msg_box(self, icon_type, title, text):
+        """Method for render messageboxes without icons on "OK" button"""
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(icon_type)
+        msg_box.setWindowTitle(title)
+        msg_box.setText(text)
+
+        msg_box.addButton("OK", QMessageBox.ButtonRole.AcceptRole)
+
+        msg_box.exec()
+
     def retranslate_ui(self):
         """Update all texts in ui"""
         self.header_label.setText(translate.get_translation("check_header"))
@@ -100,8 +111,8 @@ class CheckTab(QWidget):
         password = self.input.text()
 
         if not password:
-            QMessageBox.warning(
-                self,
+            self._show_msg_box(
+                QMessageBox.Icon.Warning,
                 translate.get_translation("warning_title"),
                 translate.get_translation("empty_pass_msg"),
             )
