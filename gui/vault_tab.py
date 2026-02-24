@@ -198,7 +198,7 @@ class VaultTab(QWidget):
             self.service_input.setText(entry.service)
             self.name_input.setText(entry.username)
             self.pass_input.setText(entry.password)
-            self.notes_input.setText(entry.notes)
+            self.notes_input.setPlainText(entry.notes or "")
         else:
             self._show_msg_box(
                 QMessageBox.Icon.Warning,
