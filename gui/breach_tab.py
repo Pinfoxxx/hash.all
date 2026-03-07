@@ -181,7 +181,7 @@ class CheckTab(QWidget):
         if self.check_thread is not None and self.check_thread.isRunning():
             self.check_thread.cancel()
 
-        self.check_worker = PasswordCheckWorker(
+        self.check_worker = PasswordCheckThread(
             password=password,
             use_bypass=self.cb_bypass.isChecked(),
             hibp_api=self.hibp_api,
