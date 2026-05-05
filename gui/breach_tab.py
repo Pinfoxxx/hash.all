@@ -9,6 +9,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QWidget,
+    QFrame,
+    QProgressBar,
 )
 
 from gui.translator import translate
@@ -39,15 +41,32 @@ class CheckTab(QWidget):
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         layout.setSpacing(15)
         self.setLayout(layout)
+        layout.addSpacing(20) # Add upper space
 
         # Label
         self.header_label = QLabel()
         layout.addWidget(self.header_label)
 
+        # Input layout (vertical)
+        input_layout = QVBoxLayout()
+        input_layout.setSpacing(2)
+
         # Password entry line
         self.input = QLineEdit()
         self.input.setEchoMode(QLineEdit.EchoMode.Password)
+        self.input.textChanged.connect(self.update_strength_indicator) # Strength indicator
         layout.addWidget(self.input)
+
+        # Strength indicator
+        self.strength_bar = QProgressBar()
+        self.strength_bar.setFixedHeight(4)
+        self.strength_bar.setTextVisible(False)
+        self.strength_bar.setStyleSheet("""
+            QProgressBar { border: none; background-color: #333333; border-radius: 2px; }
+            QProgressBar::chunk { background-color: transparent; border-radius: 2px; }
+        """)
+        input_layout.addWidget(self.strength_bar)
+        layout.addLayout(input_layout)
 
         # Checkboxes layout
         checkboxes = QVBoxLayout()
@@ -82,16 +101,32 @@ class CheckTab(QWidget):
         button_layout.addStretch()
         layout.addLayout(button_layout)
 
-        # Process status label
+        # Alert box
         self.status_label = QLabel("")
         self.status_label.setWordWrap(True)
-        self.status_label.setStyleSheet("font-weight: bold; font-size: 13px;")
+        self.status_label.setVisible(False)
+        self.status_label.setContentsMargins(12, 10, 12, 10)
         layout.addWidget(self.status_label)
-        layout.addSpacing(20)
+        layout.addSpacing(10)
 
-        # Trust block (Filler), vertical layout
-        trust_layout = QVBoxLayout()
+        # Trust block frame
+        self.trust_frame = QFrame()
+        # self.trust_frame.setMaximumWidth(650)
+        self.trust_frame.setStyleSheet("""
+                    QFrame {
+                        background-color: #242424; 
+                        border: 1px solid #363636; 
+                        border-radius: 8px;
+                    }
+                    QLabel {
+                        border: none;
+                        background: transparent;
+                    }
+                """)
+        # Trust block layout
+        trust_layout = QVBoxLayout(self.trust_frame)
         trust_layout.setSpacing(5)
+        trust_layout.setContentsMargins(15, 15, 15, 15)
 
         # Trust title
         self.trust_title = QLabel()
@@ -106,8 +141,57 @@ class CheckTab(QWidget):
 
         trust_layout.addWidget(self.trust_title)
         trust_layout.addWidget(self.trust_desc)
-        layout.addLayout(trust_layout)
+        layout.addWidget(self.trust_frame)
+
+        # Trust block wrapper
+        # trust_wrapper = QHBoxLayout()
+        # trust_wrapper.addWidget(self.trust_frame)
+        # trust_wrapper.addStretch()
+        # layout.addLayout(trust_wrapper)
+
         layout.addStretch()
+
+    def update_strength_indicator(self, text):
+        """Strength logic for progress bar"""
+        length = len(text)
+        if length == 0:
+            self.strength_bar.setValue(0)
+            color = "transparent"
+        elif length < 6:
+            self.strength_bar.setValue(33)
+            color = "#ff4d4d" # Red (weak)
+        elif length < 10:
+            self.strength_bar.setValue(66)
+            color = "#ffa500" # Yellow (medium)
+        else:
+            self.strength_bar.setValue(100)
+            color = "#2ecc71" # Green (safe ... maybe idk)
+
+        self.strength_bar.setStyleSheet(f"""
+                    QProgressBar {{ border: none; background-color: #333333; border-radius: 2px; }}
+                    QProgressBar::chunk {{ background-color: {color}; border-radius: 2px; }}
+                """)
+
+    def set_status_style(self, style_type):
+        """Applying QSS style to bar"""
+        base_style = "font-weight: bold; font-size: 13px; border-radius: 6px;"
+
+        if style_type == "checking":
+            # Blue bar (checking)
+            self.status_label.setStyleSheet(
+                base_style + "color: #4da3df; background-color: #172A3A; border: 1px solid #234D6E;")
+        elif style_type == "found":
+            # Red bar (bad)
+            self.status_label.setStyleSheet(
+                base_style + "color: #ff4d4d; background-color: #3A1717; border: 1px solid #6E2323;")
+        elif style_type == "secure":
+            # Green bar (good)
+            self.status_label.setStyleSheet(
+                base_style + "color: #2ecc71; background-color: #173A21; border: 1px solid #236E39;")
+        elif style_type == "error":
+            # Orange bar (connection error)
+            self.status_label.setStyleSheet(
+                base_style + "color: #ffa500; background-color: #3A2B17; border: 1px solid #6E5323;")
 
     def retranslate_ui(self):
         """Update all texts in ui"""
@@ -135,7 +219,8 @@ class CheckTab(QWidget):
 
         # Indication
         self.status_label.setText(translate.get_translation("status_checking"))
-        self.status_label.setStyleSheet("color: #4da3df;")
+        self.set_status_style("checking")
+        self.status_label.setVisible(True)
         self.check.setEnabled(False)
 
         # Update UI
@@ -157,7 +242,7 @@ class CheckTab(QWidget):
                     count = self.ru_db.check_password(password)
                 else:
                     self.status_label.setText("status_db_error")
-                    self.status_label.setStyleSheet("color: #ff4d4d")
+                    self.set_status_style("error")
                     self.check.setEnabled(True)
                     return
             else:
@@ -170,22 +255,22 @@ class CheckTab(QWidget):
                     api=api_name
                 )
                 self.status_label.setText(msg)
-                self.status_label.setStyleSheet("color: #ffa500")
+                self.set_status_style("error")
             elif count > 0:  # No error, but still not good
                 msg = translate.get_translation("status_found").format(
                     count=count, api=api_name
                 )
                 self.status_label.setText(msg)
-                self.status_label.setStyleSheet("color: #ff4d4d")
+                self.set_status_style("found")
             else:
                 msg = translate.get_translation("status_secure").format(api=api_name)
                 self.status_label.setText(msg)
-                self.status_label.setStyleSheet("color: #2ecc71;")
+                self.set_status_style("secure")
 
         except Exception as e:
             msg = translate.get_translation("status_error").format(error=str(e))
             self.status_label.setText(msg)
-            self.status_label.setStyleSheet("color: #888;")
+            self.set_status_style("error")
 
         finally:
             self.check.setEnabled(True)
