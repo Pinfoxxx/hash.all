@@ -101,5 +101,7 @@
     "login_warning_creds": "Invalid credentials! Remaining attempts: {remaining_attempts}",
     "login_warning_lockout_first": "Too many failed attempts. Try again in {lockout_time} seconds.",
     "login_warning_lockout_second": "Unfortunately, your account has been locked due to too many errors. Please try again in {lockout_time} seconds.",
-    "register_warning_username_exists": "This username is already taken"
+    "register_warning_username_exists": "This username is already taken",
+     "trust_title": "\uD83D\uDEE1\uFE0F Safe checking process",
+     "trust_desc": "Your password is never sent in plain text. We hash it locally and use the k-Anonymity model, sending only the first 5 characters of the hash. This guarantees 100% anonymity."
 } 

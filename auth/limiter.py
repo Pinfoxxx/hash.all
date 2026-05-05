@@ -8,9 +8,9 @@ from models.auth_model import AuthRespModel
 
 class RateLimiter:
     def __init__(self):
-        self.failed_attempts: Dict[
-            str, Dict[str, Any]
-        ] = {}  # Failed attempts. Key = username, Arg = count / first_attempt / last_attempt
+        self.failed_attempts: Dict[str, Dict[str, Any]] = (
+            {}
+        )  # Failed attempts. Key = username, Arg = count / first_attempt / last_attempt
         self.lock = threading.RLock()  # Reentrant lock
         self.last_cleanup = time.time()  # Last cleanup time
 

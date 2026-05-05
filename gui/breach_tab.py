@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QVBoxLayout,
+    QHBoxLayout,
     QWidget,
 )
 
@@ -32,7 +33,7 @@ class CheckTab(QWidget):
         self.retranslate_ui()
 
     def init_ui(self):
-        # Default layout
+        # Default layout (vertical)
         layout = QVBoxLayout()
 
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -50,6 +51,7 @@ class CheckTab(QWidget):
 
         # Checkboxes layout
         checkboxes = QVBoxLayout()
+        checkboxes.setSpacing(10)
 
         # Checkboxes
         self.cb_show = QCheckBox()
@@ -65,24 +67,46 @@ class CheckTab(QWidget):
         # Add checkboxes to layout
         checkboxes.addWidget(self.cb_show)
         checkboxes.addWidget(self.cb_bypass)
-        checkboxes.addStretch()
         layout.addLayout(checkboxes)
+
+        # Button layout (horizontal)
+        button_layout = QHBoxLayout()
+        self.check = QPushButton()
+        self.check.setFixedHeight(40)
+        self.check.setMinimumWidth(200)
+
+        # Connect check handler
+        self.check.clicked.connect(self.check_handler)
+
+        button_layout.addWidget(self.check)
+        button_layout.addStretch()
+        layout.addLayout(button_layout)
 
         # Process status label
         self.status_label = QLabel("")
         self.status_label.setWordWrap(True)
         self.status_label.setStyleSheet("font-weight: bold; font-size: 13px;")
-
-        # Buttons
-        self.check = QPushButton()
-        self.check.setFixedHeight(40)
-
-        # Connect check handler
-        self.check.clicked.connect(self.check_handler)
-
-        # Add widgets in layout
         layout.addWidget(self.status_label)
-        layout.addWidget(self.check)
+        layout.addSpacing(20)
+
+        # Trust block (Filler), vertical layout
+        trust_layout = QVBoxLayout()
+        trust_layout.setSpacing(5)
+
+        # Trust title
+        self.trust_title = QLabel()
+        self.trust_title.setStyleSheet(
+            "font-weight: bold; font-size: 14px; color: #a0a0a0;"
+        )
+
+        # Trust description
+        self.trust_desc = QLabel()
+        self.trust_desc.setWordWrap(True)
+        self.trust_desc.setStyleSheet("color: #888888; font-size: 12px;")
+
+        trust_layout.addWidget(self.trust_title)
+        trust_layout.addWidget(self.trust_desc)
+        layout.addLayout(trust_layout)
         layout.addStretch()
 
     def retranslate_ui(self):
@@ -94,6 +118,8 @@ class CheckTab(QWidget):
         self.cb_show.setText(translate.get_translation("show_pass"))
         self.cb_bypass.setText(translate.get_translation("use_ru_db"))
         self.check.setText(translate.get_translation("check_btn"))
+        self.trust_title.setText(translate.get_translation("trust_title"))
+        self.trust_desc.setText(translate.get_translation("trust_desc"))
 
     def check_handler(self):
         """Check password"""

@@ -43,8 +43,7 @@ class LoginWindow(QWidget):
         self.lang_btn = QPushButton("EN")
         self.lang_btn.setFixedSize(60, 30)
         self.lang_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.lang_btn.setStyleSheet(
-            """
+        self.lang_btn.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
                 border: 1px solid #555;
@@ -56,8 +55,7 @@ class LoginWindow(QWidget):
                 border-color: #4da3df;
                 color: #4da3df;
             }
-            """
-        )
+            """)
         self.lang_btn.clicked.connect(self.toggle_language)
         top_layout.addWidget(self.lang_btn)
 
